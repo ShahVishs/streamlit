@@ -110,6 +110,6 @@ with container:
                 message(f"You: {query}\n[{timestamp}]", is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(f"AI: {answer}\n[{timestamp}]", key=f"{i}_answer", avatar_style="thumbs")
         
-        # Save conversation to Google Sheets along with user name
-        if st.session_state.user_name:
-            save_chat_to_google_sheets(st.session_state.user_name, user_input, output)
+    # Save conversation to Google Sheets along with user name
+    if st.session_state.user_name:
+        save_chat_to_google_sheets(st.session_state.user_name, user_input, output)
