@@ -83,7 +83,7 @@ def conversational_chat(query):
 with container:
     
     if st.session_state.user_name is None:
-        user_name = st.text_input("Your Name:")
+        user_name = st.text_input("Full name:")
         if user_name:
             st.session_state.user_name = user_name
 
