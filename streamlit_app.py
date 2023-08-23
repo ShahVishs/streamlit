@@ -91,13 +91,14 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
         output = conversational_chat(user_input)
+        
         # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.history):
                 # Get the current UTC timestamp
                 utc_now = datetime.now(timezone('UTC'))
-                message(f"{user_input}", is_user=True, avatar_style="big-smile")
-                message(f"{output}", avatar_style="thumbs")
+                message(f"{query}", is_user=True, avatar_style="big-smile", key=f"query_{i}")
+                message(f"{answer}", avatar_style="thumbs", key=f"answer_{i}")
         
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
