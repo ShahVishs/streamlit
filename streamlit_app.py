@@ -36,7 +36,7 @@ if 'past' not in st.session_state:
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-def save_chat_to_google_sheets(user_name, user_input, output, timestamp): 
+def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
     try:
         # Connect to Google Sheets using service account credentials
         credentials = service_account.Credentials.from_service_account_info(
@@ -57,6 +57,7 @@ def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
         st.success("Data saved to Google Sheets!")
     except Exception as e:
         st.error(f"Error saving data to Google Sheets: {str(e)}")
+        
 # Initialize conversation history with intro_prompt
 custom_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. At the end of standalone question add this 'Answer the question in english language.' If you do not know the answer reply with 'I am sorry'.
 Chat History:
@@ -89,14 +90,16 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
         output = conversational_chat(user_input)
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
         
-        # Display user's message with timestamp
-        message(f"{user_input}\n{timestamp}", is_user=True, avatar_style="big-smile")
+        # Get the current UTC timestamp
+        utc_now = datetime.now(timezone('UTC'))
         
-        # Display AI's response with timestamp
-        message(f"{output}\n{timestamp}", avatar_style="thumbs")
+        # Display user's message with UTC timestamp
+        message(f"{user_input}\n{utc_now.strftime('%Y-%m-%d %H:%M:%S')}", is_user=True, avatar_style="big-smile")
+        
+        # Display AI's response with UTC timestamp
+        message(f"{output}\n{utc_now.strftime('%Y-%m-%d %H:%M:%S')}", avatar_style="thumbs")
     
-        # Save conversation to Google Sheets along with user name and timestamp
+        # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
-            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, timestamp)
+            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now)
