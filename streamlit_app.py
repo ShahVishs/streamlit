@@ -13,7 +13,8 @@ import tempfile
 import pandas as pd
 import os
 import csv
-import requests
+import gspread
+from google.oauth2 import service_account
 import base64
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
@@ -35,35 +36,24 @@ if 'past' not in st.session_state:
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-def save_chat_to_github(user_name, user_input, output):
-    file_content = f'user_name,question,answer\n{user_name},{user_input},{output}\n'
-    encoded_content = base64.b64encode(file_content.encode()).decode()
-
-    token = st.secrets["GITHUB"]
-    repo = "streamlit"  # Replace with your GitHub repository
-    branch = "main"  # Replace with your repository's default branch
-    file_path = "conversation_history.csv"
-
-    url = f"https://api.github.com/repos/{repo}/contents/{file_path}"
-    headers = {"Authorization": f"Bearer {token}"}
-    payload = {
-        "message": "Add conversation history",
-        "content": encoded_content,
-        "branch": branch
-    }
-
-    response = requests.put(url, headers=headers, json=payload)
-    response_json = response.json()
-
-    if "content" in response_json:
-        st.success("Conversation history uploaded successfully to GitHub!")
-    else:
-        st.error("Failed to upload conversation history to GitHub.")
-
-    if "content" in response_json:
-        st.success("Conversation history uploaded successfully to GitHub!")
-    else:
-        st.error("Failed to upload conversation history to GitHub.")
+def save_chat_to_google_sheets(user_name, user_input, output):
+    # Connect to Google Sheets using service account credentials
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=["https://www.googleapis.com/auth/spreadsheets"],
+    )
+    gc = gspread.authorize(credentials)
+    
+    # Get the Google Sheet by URL
+    sheet_url = st.secrets["https://docs.google.com/spreadsheets/d/1yig64HFv4r8CKc6fWDXNKQgDwz_fBXtZEMYWVYoqKmU/edit?usp=sharing"]
+    sheet = gc.open_by_url(sheet_url)
+    
+    # Select the desired worksheet
+    worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
+    
+    # Append data to the Google Sheet
+    data = [user_name, user_input, output]
+    worksheet.append_row(data)
 
 # Initialize conversation history with intro_prompt
 custom_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. At the end of standalone question add this 'Answer the question in english language.' If you do not know the answer reply with 'I am sorry'.
@@ -101,13 +91,13 @@ with container:
 
     if submit_button and user_input:
         output = conversational_chat(user_input)
-
+    
         # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
-
-        # Save conversation to CSV along with user name
+    
+        # Save conversation to Google Sheets along with user name
         if st.session_state.user_name:
-            save_chat_to_github(st.session_state.user_name, user_input, output)
+            save_chat_to_google_sheets(st.session_state.user_name, user_input, output)
