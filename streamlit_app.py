@@ -45,7 +45,7 @@ def save_chat_to_google_sheets(user_name, user_input, output):
     gc = gspread.authorize(credentials)
     
     # Get the Google Sheet by URL
-    sheet_url = st.secrets["https://docs.google.com/spreadsheets/d/1yig64HFv4r8CKc6fWDXNKQgDwz_fBXtZEMYWVYoqKmU/edit?usp=sharing"]
+    sheet_url = st.secrets["public_gsheets_url"]
     sheet = gc.open_by_url(sheet_url)
     
     # Select the desired worksheet
