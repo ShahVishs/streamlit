@@ -92,10 +92,10 @@ with container:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
         
         # Display user's message with timestamp
-        message(f"You: {user_input}\n[{timestamp}]", is_user=True, avatar_style="big-smile")
+        message(f"{user_input}\n{timestamp}", is_user=True, avatar_style="big-smile")
         
         # Display AI's response with timestamp
-        message(f"AI: {output}\n[{timestamp}]", avatar_style="thumbs")
+        message(f"{output}\n{timestamp}", avatar_style="thumbs")
     
         # Save conversation to Google Sheets along with user name and timestamp
         if st.session_state.user_name:
