@@ -13,6 +13,8 @@ import tempfile
 import pandas as pd
 import os
 import csv
+import requests
+import base64
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -37,9 +39,9 @@ def save_chat_to_github(user_name, user_input, output):
     file_content = f'user_name,question,answer\n{user_name},{user_input},{output}\n'
     encoded_content = base64.b64encode(file_content.encode()).decode()
 
-    token = st.secrets["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"]
-    repo = "buravelliprasad/streamlit" 
-    branch = "main"  
+    token = st.secrets["GITHUB"]
+    repo = "streamlit"  # Replace with your GitHub repository
+    branch = "main"  # Replace with your repository's default branch
     file_path = "conversation_history.csv"
 
     url = f"https://api.github.com/repos/{repo}/contents/{file_path}"
@@ -52,6 +54,11 @@ def save_chat_to_github(user_name, user_input, output):
 
     response = requests.put(url, headers=headers, json=payload)
     response_json = response.json()
+
+    if "content" in response_json:
+        st.success("Conversation history uploaded successfully to GitHub!")
+    else:
+        st.error("Failed to upload conversation history to GitHub.")
 
     if "content" in response_json:
         st.success("Conversation history uploaded successfully to GitHub!")
