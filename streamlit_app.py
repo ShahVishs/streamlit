@@ -94,20 +94,20 @@ with container:
         submit_button = st.form_submit_button(label='Send')
 
     if submit_button and user_input:
-    output = conversational_chat(user_input)
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
-    
-    # Append data to history with timestamps
-    st.session_state.history.append((f"You: {user_input} [{timestamp}]", 
-                                     f"AI: {output} [{timestamp}]"))
-    
-    # Display conversation history with proper differentiation
-    with response_container:
-        for i, (query, answer) in enumerate(st.session_state.history):
-            message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-            message(answer, key=f"{i}_answer", avatar_style="thumbs")
-    
-    # Save conversation to Google Sheets along with user name and timestamp
-    if st.session_state.user_name:
-        save_chat_to_google_sheets(st.session_state.user_name, user_input, output, timestamp)
-    
+        output = conversational_chat(user_input)
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
+        
+        # Append data to history with timestamps
+        st.session_state.history.append((f"You: {user_input} [{timestamp}]", 
+                                         f"AI: {output} [{timestamp}]"))
+        
+        # Display conversation history with proper differentiation
+        with response_container:
+            for i, (query, answer) in enumerate(st.session_state.history):
+                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+                message(answer, key=f"{i}_answer", avatar_style="thumbs")
+        
+        # Save conversation to Google Sheets along with user name and timestamp
+        if st.session_state.user_name:
+            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, timestamp)
+        
