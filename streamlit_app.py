@@ -15,6 +15,7 @@ import csv
 import gspread
 from google.oauth2 import service_account
 import base64
+import datetime
 from datetime import datetime
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
