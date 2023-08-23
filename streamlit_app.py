@@ -17,6 +17,7 @@ from google.oauth2 import service_account
 import base64
 import datetime
 from datetime import datetime
+from pytz import timezone
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -94,15 +95,17 @@ with container:
 
     if submit_button and user_input:
         output = conversational_chat(user_input)
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')  # Get current timestamp
+        
+        # Get the current UTC timestamp
+        utc_now = datetime.now(timezone('UTC'))
         
         # Display user's message with timestamp
-        message(f" {user_input}\n{timestamp}", is_user=True, avatar_style="big-smile")
+        message(f"{user_input}\n[{utc_now.strftime('%Y-%m-%d %H:%M:%S')}]", is_user=True, avatar_style="big-smile")
         
         # Display AI's response with timestamp
-        message(f"{output}\n{timestamp}", avatar_style="thumbs")
+        message(f"{output}\n[{utc_now.strftime('%Y-%m-%d %H:%M:%S')}]", avatar_style="thumbs")
     
-        # Save conversation to Google Sheets along with user name and timestamp
+        # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
-            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, timestamp)
+            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now)
         
