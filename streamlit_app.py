@@ -103,8 +103,8 @@ with container:
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.history):
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                message(f"{timestamp} - {query}", is_user=True, key=f"{i}_user", avatar_style="big-smile")
-                message(f"{timestamp} - {answer}", key=f"{i}_answer", avatar_style="thumbs")
+                message(f"{query}", is_user=True, key=f"{i}_user", avatar_style="big-smile, {timestamp} ")
+                message(f"{answer}", key=f"{i}_answer", avatar_style="thumbs", {timestamp} )
     
         # Save conversation to Google Sheets along with user name
         if st.session_state.user_name:
