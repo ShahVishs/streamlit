@@ -85,7 +85,7 @@ def conversational_chat(query):
 with container:
     
     if st.session_state.user_name is None:
-        user_name = st.text_input("Full name:")
+        user_name = st.text_input("Your name:")
         if user_name:
             st.session_state.user_name = user_name
 
@@ -97,14 +97,17 @@ with container:
     if submit_button and user_input:
         output = conversational_chat(user_input)
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
-        st.session_state.history.append((timestamp, user_input, output))
+        st.session_state.history.append({"timestamp": timestamp, "query": user_input, "answer": output})
     
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(st.session_state.history):
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                message(f"{query}", is_user=True, key=f"{i}_user", avatar_style="big-smile, {timestamp} ")
-                message(f"{answer}", key=f"{i}_answer", avatar_style="thumbs", {timestamp} )
+            for i, message in enumerate(st.session_state.history):
+                timestamp = message["timestamp"]
+                query = message["query"]
+                answer = message["answer"]
+                if isinstance(timestamp, str) and isinstance(query, str) and isinstance(answer, str):
+                    message(f"You: {query}\n[{timestamp}]", is_user=True, key=f"{i}_user", avatar_style="big-smile")
+                    message(f"AI: {answer}\n[{timestamp}]", key=f"{i}_answer", avatar_style="thumbs")
     
         # Save conversation to Google Sheets along with user name
         if st.session_state.user_name:
