@@ -91,9 +91,9 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
         output = conversational_chat(user_input)
-        
-        # Clear previous messages from response_container
-        response_container.empty()
+       
+        # Get the current UTC timestamp
+        utc_now = datetime.now(timezone('UTC'))
         
         # Display conversation history with proper differentiation
         with response_container:
