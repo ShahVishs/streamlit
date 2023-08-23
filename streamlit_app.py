@@ -16,6 +16,7 @@ import gspread
 from google.oauth2 import service_account
 import base64
 from datetime import datetime
+from pytz import timezone
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
