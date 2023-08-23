@@ -95,13 +95,13 @@ with container:
         submit_button = st.form_submit_button(label='Send')
 
     if submit_button and user_input:
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        history_entry = (current_time, user_input, conversational_chat(user_input))
-        st.session_state.history.append(history_entry)
+        output = conversational_chat(user_input)
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
+        st.session_state.history.append((timestamp, user_input, output))
     
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(st.session_state.history):
+            for i, (timestamp, query, answer) in enumerate(st.session_state.history):
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 message(f"{timestamp} - {query}", is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(f"{timestamp} - {answer}", key=f"{i}_answer", avatar_style="thumbs")
