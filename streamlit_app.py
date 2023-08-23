@@ -54,7 +54,10 @@ def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
         # Select the desired worksheet
         worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
     
-        data = [timestamp, user_name, user_input, output]
+        # Convert timestamp to string representation
+        timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        
+        data = [timestamp_str, user_name, user_input, output]
         worksheet.append_row(data)
         st.success("Data saved to Google Sheets!")
     except Exception as e:
@@ -100,10 +103,10 @@ with container:
         utc_now = datetime.now(timezone('UTC'))
         
         # Display user's message with timestamp
-        message(f"{user_input}\n[{utc_now.strftime('%Y-%m-%d %H:%M:%S')}]", is_user=True, avatar_style="big-smile")
+        message(f" {user_input}\n{utc_now.strftime('%Y-%m-%d %H:%M:%S')}", is_user=True, avatar_style="big-smile")
         
         # Display AI's response with timestamp
-        message(f"{output}\n[{utc_now.strftime('%Y-%m-%d %H:%M:%S')}]", avatar_style="thumbs")
+        message(f" {output}\n{utc_now.strftime('%Y-%m-%d %H:%M:%S')}", avatar_style="thumbs")
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
