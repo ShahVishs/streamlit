@@ -93,7 +93,7 @@ with container:
         output = conversational_chat(user_input)
         
         # Get the current UTC timestamp
-        utc_now = datetime.datetime.now(timezone('UTC'))
+        utc_now = datetime.now(timezone('UTC'))
         
         # Display user's message with UTC timestamp
         message(f"{user_input}\n{utc_now.strftime('%Y-%m-%d-%H-%M-%S')}", is_user=True, avatar_style="big-smile")
