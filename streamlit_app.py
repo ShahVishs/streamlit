@@ -102,9 +102,9 @@ with container:
         # Display conversation history with proper differentiation
         with response_container:
             for i, message in enumerate(st.session_state.history):
-                timestamp = message["timestamp"]
-                query = message["query"]
-                answer = message["answer"]
+                timestamp = message.timestamp
+                query = message.query
+                answer = message.answer
                 if isinstance(timestamp, str) and isinstance(query, str) and isinstance(answer, str):
                     message(f"You: {query}\n[{timestamp}]", is_user=True, key=f"{i}_user", avatar_style="big-smile")
                     message(f"AI: {answer}\n[{timestamp}]", key=f"{i}_answer", avatar_style="thumbs")
