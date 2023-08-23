@@ -33,13 +33,30 @@ if 'past' not in st.session_state:
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-def save_chat_to_csv(user_name, user_input, output):
-    with open("conversation_history.csv", mode="a", newline="") as csvfile:
-        fieldnames = ["user_name", "question", "answer"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        if csvfile.tell() == 0:  # Check if the file is empty and write the header
-            writer.writeheader()
-        writer.writerow({"user_name": user_name, "question": user_input, "answer": output})
+def save_chat_to_github(user_name, user_input, output):
+    file_content = f'user_name,question,answer\n{user_name},{user_input},{output}\n'
+    encoded_content = base64.b64encode(file_content.encode()).decode()
+
+    token = st.secrets["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"]
+    repo = "buravelliprasad/streamlit" 
+    branch = "main"  
+    file_path = "conversation_history.csv"
+
+    url = f"https://api.github.com/repos/{repo}/contents/{file_path}"
+    headers = {"Authorization": f"Bearer {token}"}
+    payload = {
+        "message": "Add conversation history",
+        "content": encoded_content,
+        "branch": branch
+    }
+
+    response = requests.put(url, headers=headers, json=payload)
+    response_json = response.json()
+
+    if "content" in response_json:
+        st.success("Conversation history uploaded successfully to GitHub!")
+    else:
+        st.error("Failed to upload conversation history to GitHub.")
 
 # Initialize conversation history with intro_prompt
 custom_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. At the end of standalone question add this 'Answer the question in english language.' If you do not know the answer reply with 'I am sorry'.
@@ -86,4 +103,4 @@ with container:
 
         # Save conversation to CSV along with user name
         if st.session_state.user_name:
-            save_chat_to_csv(st.session_state.user_name, user_input, output)
+            save_chat_to_github(st.session_state.user_name, user_input, output)
