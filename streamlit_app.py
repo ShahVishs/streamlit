@@ -52,10 +52,8 @@ def save_chat_to_google_sheets(user_name, user_input, output):
         # Select the desired worksheet
         worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
     
-        # Get the current timestamp
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        data = [current_time, user_name, user_input, output]
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data = [timestamp, user_name, user_input, output]
         worksheet.append_row(data)
         st.success("Data saved to Google Sheets!")
     except Exception as e:
@@ -103,10 +101,10 @@ with container:
     
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (timestamp, query, answer) in enumerate(st.session_state.history):
-                st.write(f"Time: {timestamp}")
-                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-                message(answer, key=f"{i}_answer", avatar_style="thumbs")
+            for i, (query, answer) in enumerate(st.session_state.history):
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                message(f"{timestamp} - {query}", is_user=True, key=f"{i}_user", avatar_style="big-smile")
+                message(f"{timestamp} - {answer}", key=f"{i}_answer", avatar_style="thumbs")
     
         # Save conversation to Google Sheets along with user name
         if st.session_state.user_name:
