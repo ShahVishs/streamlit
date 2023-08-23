@@ -37,23 +37,26 @@ if 'past' not in st.session_state:
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 def save_chat_to_google_sheets(user_name, user_input, output):
-    # Connect to Google Sheets using service account credentials
-    credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=["https://www.googleapis.com/auth/spreadsheets"],
-    )
-    gc = gspread.authorize(credentials)
+    try:
+        # Connect to Google Sheets using service account credentials
+        credentials = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=["https://www.googleapis.com/auth/spreadsheets"],
+        )
+        gc = gspread.authorize(credentials)
+        
+        # Get the Google Sheet by URL
+        sheet_url = st.secrets["public_gsheets_url"]
+        sheet = gc.open_by_url(sheet_url)
+        
+        # Select the desired worksheet
+        worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
     
-    # Get the Google Sheet by URL
-    sheet_url = st.secrets["public_gsheets_url"]
-    sheet = gc.open_by_url(sheet_url)
-    
-    # Select the desired worksheet
-    worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
-    
-    # Append data to the Google Sheet
-    data = [user_name, user_input, output]
-    worksheet.append_row(data)
+        data = [user_name, user_input, output]
+        worksheet.append_row(data)
+        st.success("Data saved to Google Sheets!")
+    except Exception as e:
+        st.error(f"Error saving data to Google Sheets: {str(e)}")
 
 # Initialize conversation history with intro_prompt
 custom_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. At the end of standalone question add this 'Answer the question in english language.' If you do not know the answer reply with 'I am sorry'.
