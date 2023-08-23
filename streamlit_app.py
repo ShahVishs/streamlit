@@ -52,7 +52,6 @@ def save_chat_to_google_sheets(user_name, user_input, output):
         # Select the desired worksheet
         worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
     
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = [timestamp, user_name, user_input, output]
         worksheet.append_row(data)
         st.success("Data saved to Google Sheets!")
@@ -100,16 +99,16 @@ with container:
         
         # Append data as a dictionary to history
         st.session_state.history.append({"timestamp": timestamp, "query": user_input, "answer": output})
-        
-        # Display conversation history with proper differentiation
-        with response_container:
-            for i, message in enumerate(st.session_state.history):
-                timestamp = message.get("timestamp")  # Use .get() to safely access dictionary key
-                query = message.get("query")
-                answer = message.get("answer")
-                if isinstance(timestamp, str) and isinstance(query, str) and isinstance(answer, str):
-                    message(f"You: {query}\n[{timestamp}]", is_user=True, key=f"{i}_user", avatar_style="big-smile")
-                    message(f"AI: {answer}\n[{timestamp}]", key=f"{i}_answer", avatar_style="thumbs")
+ 
+    # Display conversation history with proper differentiation
+    with response_container:
+        for i, msg in enumerate(st.session_state.history):
+            timestamp = msg.get("timestamp")
+            query = msg.get("query")
+            answer = msg.get("answer")
+            if isinstance(timestamp, str) and isinstance(query, str) and isinstance(answer, str):
+                message(f"You: {query}\n[{timestamp}]", is_user=True, key=f"{i}_user", avatar_style="big-smile")
+                message(f"AI: {answer}\n[{timestamp}]", key=f"{i}_answer", avatar_style="thumbs")
         
         # Save conversation to Google Sheets along with user name
         if st.session_state.user_name:
