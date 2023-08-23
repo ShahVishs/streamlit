@@ -101,7 +101,7 @@ with container:
     
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (timestamp, query, answer) in enumerate(st.session_state.history):
+            for i, (query, answer) in enumerate(st.session_state.history):
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 message(f"{timestamp} - {query}", is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(f"{timestamp} - {answer}", key=f"{i}_answer", avatar_style="thumbs")
