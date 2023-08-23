@@ -36,7 +36,7 @@ if 'past' not in st.session_state:
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-def save_chat_to_google_sheets(user_name, user_input, output):
+def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
     try:
         # Connect to Google Sheets using service account credentials
         credentials = service_account.Credentials.from_service_account_info(
