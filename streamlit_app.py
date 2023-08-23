@@ -111,5 +111,5 @@ with container:
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
-            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now_str)
+            save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.isoformat())
         
