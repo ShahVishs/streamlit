@@ -15,6 +15,7 @@ import csv
 import gspread
 from google.oauth2 import service_account
 import base64
+from datetime import datetime
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -51,7 +52,10 @@ def save_chat_to_google_sheets(user_name, user_input, output):
         # Select the desired worksheet
         worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
     
-        data = [user_name, user_input, output]
+        # Get the current timestamp
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        data = [current_time, user_name, user_input, output]
         worksheet.append_row(data)
         st.success("Data saved to Google Sheets!")
     except Exception as e:
@@ -93,11 +97,14 @@ with container:
         submit_button = st.form_submit_button(label='Send')
 
     if submit_button and user_input:
-        output = conversational_chat(user_input)
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        history_entry = (current_time, user_input, conversational_chat(user_input))
+        st.session_state.history.append(history_entry)
     
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(st.session_state.history):
+            for i, (timestamp, query, answer) in enumerate(st.session_state.history):
+                st.write(f"Time: {timestamp}")
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
     
