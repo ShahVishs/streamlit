@@ -97,8 +97,8 @@ with container:
             for i, (query, answer) in enumerate(st.session_state.history):
                 # Get the current UTC timestamp
                 utc_now = datetime.now(timezone('UTC'))
-                message(f"{query}", is_user=True, avatar_style="big-smile", key=f"query_{i}")
-                message(f"{answer}", avatar_style="thumbs", key=f"answer_{i}")
+                st.text(f"User: {query} ({utc_now.strftime('%Y-%m-%d-%H-%M-%S')})")
+                st.text(f"AI: {answer} ({utc_now.strftime('%Y-%m-%d-%H-%M-%S')})")
         
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
