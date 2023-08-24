@@ -104,13 +104,8 @@ with container:
         # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
-                if i % 2 == 0:
-                    st.image("logo.png", width=30)  # Display logo for user messages
-                message(query, is_user=True, key=f"{i}_user")
-                
-                if i % 2 == 1:
-                    st.image("logo.png", width=30)  # Display logo for bot messages
-                message(answer, key=f"{i}_answer")
+                message(query, is_user=True, key=f"{i}_user", avatar_style=f'<img src="logo.png" width="30" height="30" style="margin-right: 10px;">')
+                message(answer, key=f"{i}_answer", avatar_style=f'<img src="logo.png" width="30" height="30" style="margin-right: 10px;">')
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
