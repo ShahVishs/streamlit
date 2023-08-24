@@ -105,11 +105,11 @@ with container:
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
                 if i % 2 == 0:
-                    st.image("path_to_your_logo_image.png", width=30)  # Display logo for user messages
+                    st.image("logo.png", width=30)  # Display logo for user messages
                 message(query, is_user=True, key=f"{i}_user")
                 
                 if i % 2 == 1:
-                    st.image("path_to_your_logo_image.png", width=30)  # Display logo for bot messages
+                    st.image("logo.png", width=30)  # Display logo for bot messages
                 message(answer, key=f"{i}_answer")
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
