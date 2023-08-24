@@ -81,35 +81,33 @@ response_container = st.container()
 container = st.container()
 chat_history = []  # Store the conversation history here
 
-def conversational_chat(question):
-    result = qa({"question": question, "chat_history": st.session_state.history})
-    st.session_state.history.append((question, result["answer"]))
+def conversational_chat(user_input):
+    result = qa({"question": user_input, "chat_history": st.session_state.chat_history})
+    st.session_state.chat_history.append((user_input, result["answer"]))
     return result["answer"]
 
 # Streamlit main code
-with st.container():
+with container:
     if st.session_state.user_name is None:
         user_name = st.text_input("Your name:")
         if user_name:
             st.session_state.user_name = user_name
-    
-    st.write("Conversation History:")
-    for i, (query, answer) in enumerate(st.session_state.chat_history):
-        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-        message(answer, key=f"{i}_answer", avatar_style="thumbs")
-    
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
+        output = conversational_chat(user_input)
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
-        # Get the chatbot's response
-        response = qa({"question": user_input, "chat_history": st.session_state.chat_history})
-        st.session_state.chat_history.append((user_input, response["answer"]))
         
+      # Display conversation history with proper differentiation
+        with response_container:
+            for i, (query, answer) in enumerate(st.session_state.chat_history):
+                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+                message(answer, key=f"{i}_answer", avatar_style="thumbs")
+    
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
             try:
