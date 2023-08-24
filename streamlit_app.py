@@ -96,7 +96,7 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
         # Use the query_and_chat_history function from the second code snippet
-        output = query_and_chat_history(user_input)
+        output = conversational_chat(user_input)
         
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
