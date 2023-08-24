@@ -104,11 +104,9 @@ with container:
         # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
-                image_url = "https://raw.githubusercontent.com/ShahVishs/streamlit/main/logo.png"
-                st.image(image_url, width=30, height=30)
+                st.image("logo.png")
                 message(query, is_user=True, key=f"{i}_user")
-                image_url = "https://raw.githubusercontent.com/ShahVishs/streamlit/main/logo.png"
-                st.image(image_url, width=30, height=30)
+                st.image("logo.png")
                 message(answer, key=f"{i}_answer")
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
