@@ -101,12 +101,12 @@ with container:
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
-        # Display conversation history with proper differentiation
+         # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
-                st.image("https://raw.githubusercontent.com/ShahVishs/streamlit/main/logo.png", width=30, height=30)
+                st.image("logo.png", width=30, height=30)  # Use the local path here
                 message(query, is_user=True, key=f"{i}_user")
-                st.image("https://raw.githubusercontent.com/ShahVishs/streamlit/main/logo.png", width=30, height=30)
+                st.image("logo.png", width=30, height=30)  # Use the local path here
                 message(answer, key=f"{i}_answer")
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
