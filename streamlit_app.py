@@ -75,15 +75,16 @@ qa = ConversationalRetrievalChain.from_llm(
     llm=ChatOpenAI(temperature=0.0, model_name='gpt-3.5-turbo-16k'),
     retriever=retriever,
     condense_question_prompt=CUSTOM_QUESTION_PROMPT
-#     return_source_documents=True
 )
 response_container = st.container()
 container = st.container()
 chat_history = []
 def conversational_chat(query):
-    result = qa({"question": question, "chat_history": chat_history})
-    chat_history.append((question, result["answer"]))
-    
+    result = qa({"question": question, "chat_history": st.session_state.history})
+    st.session_state.history.append((question, result["answer"]))
+    return result["answer"]
+ 
+# Streamlit main code
 with container:
     if st.session_state.user_name is None:
         user_name = st.text_input("Your name:")
@@ -93,15 +94,14 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
-        # Use the query_and_chat_history function to interact with the model and update chat history
-        output = conversational_chat(user_input)
+        output = query_and_chat_history(user_input)
        
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(chat_history):
+            for i, (query, answer) in enumerate(st.session_state.history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
         
