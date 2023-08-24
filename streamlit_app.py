@@ -93,6 +93,11 @@ with st.container():
         if user_name:
             st.session_state.user_name = user_name
     
+    st.write("Conversation History:")
+    for i, (query, answer) in enumerate(st.session_state.chat_history):
+        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+        message(answer, key=f"{i}_answer", avatar_style="thumbs")
+    
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
@@ -105,12 +110,6 @@ with st.container():
         response = qa({"question": user_input, "chat_history": st.session_state.chat_history})
         st.session_state.chat_history.append((user_input, response["answer"]))
         
-        # Display the conversation history
-        with st.expander("View Conversation History"):
-            for i, (query, answer) in enumerate(st.session_state.chat_history):
-                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-                message(answer, key=f"{i}_answer", avatar_style="thumbs")
-        
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
             try:
@@ -119,4 +118,4 @@ with st.container():
                 st.error(f"An error occurred: {e}")
             
         # # Clear the user input field after submission
-        # user_input = ""
+        # user_input = "
