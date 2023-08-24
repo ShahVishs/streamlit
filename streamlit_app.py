@@ -79,7 +79,7 @@ qa = ConversationalRetrievalChain.from_llm(
 )
 response_container = st.container()
 container = st.container()
-chat_history=[] 
+chat_history = getattr(st.session_state, "history", []) 
 def conversational_chat(query):
     result = qa({"question": query, "chat_history": chat_history})
     chat_history.append((query, result["answer"]))
