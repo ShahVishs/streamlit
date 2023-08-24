@@ -78,12 +78,13 @@ qa = ConversationalRetrievalChain.from_llm(
 )
 response_container = st.container()
 container = st.container()
-chat_history = []
+chat_history = []  # Store the conversation history here
+
 def conversational_chat(query):
-    result = qa({"question": query, "chat_history": st.session_state.history})
-    st.session_state.history.append((query, result["answer"]))
+    result = qa({"question": query, "chat_history": chat_history})
+    chat_history.append((query, result["answer"]))  # Append to chat_history
     return result["answer"]
- 
+
 # Streamlit main code
 with container:
     if st.session_state.user_name is None:
@@ -101,7 +102,7 @@ with container:
         
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(st.session_state.history):
+            for i, (query, answer) in enumerate(chat_history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
         
