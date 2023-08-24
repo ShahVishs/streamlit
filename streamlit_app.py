@@ -94,7 +94,7 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
-        output = query_and_chat_history(user_input)
+        output = conversational_chat(user_input)
        
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
