@@ -111,7 +111,7 @@ with container:
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
             try:
-                save_chat_to_google_sheets(st.session_state.user_name, user_input, result["answer"], utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
+                save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
             
