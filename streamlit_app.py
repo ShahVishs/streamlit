@@ -80,8 +80,8 @@ response_container = st.container()
 container = st.container()
 chat_history = []
 def conversational_chat(query):
-    result = qa({"question": question, "chat_history": st.session_state.history})
-    st.session_state.history.append((question, result["answer"]))
+    result = qa({"question": query, "chat_history": st.session_state.history})
+    st.session_state.history.append((query, result["answer"]))
     return result["answer"]
  
 # Streamlit main code
