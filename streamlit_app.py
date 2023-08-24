@@ -95,13 +95,11 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
-        output = conversational_chat(user_input)
-       
+        # Use the query_and_chat_history function from the second code snippet
+        output = query_and_chat_history(user_input)
+        
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
-        
-        # Update chat history with the current conversation
-        chat_history.append((user_input, output))
         
         # Display conversation history with proper differentiation
         with response_container:
@@ -114,4 +112,4 @@ with container:
             try:
                 save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
-                st.error(f"An error occurred: {e}")
+                st.error(f"An error occurred: {e}
