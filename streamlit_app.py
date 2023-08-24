@@ -60,7 +60,11 @@ def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
         st.error(f"Error saving data to Google Sheets: {str(e)}")
         
 # Initialize conversation history with intro_prompt
-custom_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. At the end of standalone question add this 'Answer the question in english language.' If you do not know the answer reply with 'I am sorry'.
+custom_template = """You are a business development manager role \
+working in a car dealership you get a text enquiry regarding inventry, business details and finance. 
+Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. 
+At the end of standalone question add this 'You should answer in a style that is American English in a calm and respectful tone.' 
+If you do not know the answer reply with 'I am sorry'.
 Chat History:
 {chat_history}
 Follow Up Input: {question}
@@ -78,6 +82,7 @@ container = st.container()
 chat_history=[] 
 def conversational_chat(query):
     result = qa({"question": query, "chat_history": chat_history})
+    chat_history.append((question, result["answer"]))
     st.session_state.history.append((query, result["answer"]))
     return result["answer"]
     
