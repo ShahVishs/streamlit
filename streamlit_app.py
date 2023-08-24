@@ -100,9 +100,12 @@ with container:
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
+        # Append the user's question and chatbot's answer to the chat_history
+        chat_history.append((user_input, output))
+        
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(chat_history):  # Use chat_history instead of st.session_state.history
+            for i, (query, answer) in enumerate(chat_history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
         
@@ -113,5 +116,5 @@ with container:
             except Exception as e:
                 st.error(f"An error occurred: {e}")
             
-        # Clear the user input field after submission
-        user_input = ""
+        # # Clear the user input field after submission
+        # user_input = ""
