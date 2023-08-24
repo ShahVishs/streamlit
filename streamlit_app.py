@@ -79,12 +79,10 @@ qa = ConversationalRetrievalChain.from_llm(
 )
 response_container = st.container()
 container = st.container()
-chat_history = getattr(st.session_state, "history", []) 
+chat_history = []
 def conversational_chat(query):
-    result = qa({"question": query, "chat_history": chat_history})
-    chat_history.append((query, result["answer"]))
-    # st.session_state.history.append((query, result["answer"]))
-    return result["answer"]
+    result = qa({"question": question, "chat_history": chat_history})
+    chat_history.append((question, result["answer"]))
     
 with container:
     if st.session_state.user_name is None:
@@ -95,9 +93,9 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     if submit_button and user_input:
-        # Use the query_and_chat_history function from the second code snippet
-        output = conversational_chat(user_input)
-        
+        # Use the query_and_chat_history function to interact with the model and update chat history
+        conversational_chat(user_input)
+       
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
