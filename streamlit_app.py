@@ -28,8 +28,8 @@ retriever = vectorstore.as_retriever(search_type="similarity", k=8)
 # Streamlit UI setup
 st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data.")
 # Initialize session state
-# if 'history' not in st.session_state:
-#     st.session_state.history = []
+if 'history' not in st.session_state:
+    st.session_state.history = []
 if 'generated' not in st.session_state:
     st.session_state.generated = []
 if 'past' not in st.session_state:
@@ -100,9 +100,12 @@ with container:
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
+        # Update chat history with the current conversation
+        chat_history.append((user_input, output))
+        
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(st.session_state.history):
+            for i, (query, answer) in enumerate(chat_history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
         
@@ -112,4 +115,3 @@ with container:
                 save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-            # save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
