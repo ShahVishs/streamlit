@@ -27,9 +27,10 @@ vectorstore = FAISS.from_documents(docs, embeddings)
 retriever = vectorstore.as_retriever(search_type="similarity", k=8)
 # Streamlit UI setup
 st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data.")
+
 # Initialize session state
-if 'history' not in st.session_state:
-    st.session_state.history = []
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
 if 'generated' not in st.session_state:
     st.session_state.generated = []
 if 'past' not in st.session_state:
@@ -86,33 +87,34 @@ def conversational_chat(question):
     return result["answer"]
 
 # Streamlit main code
-with container:
+with st.container():
     if st.session_state.user_name is None:
         user_name = st.text_input("Your name:")
         if user_name:
             st.session_state.user_name = user_name
+    
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
+    
     if submit_button and user_input:
-        output = conversational_chat(user_input)
-       
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
-        # Append the user's question and chatbot's answer to the chat_history
-        chat_history.append((user_input, output))
+        # Get the chatbot's response
+        response = qa({"question": user_input, "chat_history": st.session_state.chat_history})
+        st.session_state.chat_history.append((user_input, response["answer"]))
         
-        # Display conversation history with proper differentiation
-        with response_container:
-            for i, (query, answer) in enumerate(chat_history):
+        # Display the conversation history
+        with st.expander("View Conversation History"):
+            for i, (query, answer) in enumerate(st.session_state.chat_history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
         
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
             try:
-                save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
+                save_chat_to_google_sheets(st.session_state.user_name, user_input, response["answer"], utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
             
