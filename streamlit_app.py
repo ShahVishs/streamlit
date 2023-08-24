@@ -38,6 +38,13 @@ if 'past' not in st.session_state:
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
+
+def custom_message_with_logo(question, answer):
+    logo_image = Image.open("logo.png")
+    logo_image.thumbnail((80, 80))  # Resize the logo image with larger dimensions
+    st.image(logo_image, width=80)
+    st.write(question)
+    st.write(answer)
 def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
     try:
         # Connect to Google Sheets using service account credentials
@@ -101,13 +108,10 @@ with container:
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
-         # Display conversation history with proper differentiation
+        # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
-                st.image("logo.png", width=30, height=30)  # Use the local path here
-                message(query, is_user=True, key=f"{i}_user")
-                st.image("logo.png", width=30, height=30)  # Use the local path here
-                message(answer, key=f"{i}_answer")
+                custom_message_with_logo(query, answer)
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
