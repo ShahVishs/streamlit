@@ -101,16 +101,16 @@ with container:
         # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
         
-        
-      # Display conversation history with proper differentiation
         # Display conversation history with proper differentiation
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
-                if i % 2 == 0:  # Use a logo for user messages
-                    st.image("logo.png", width=30)
-                else:  # Use a logo for chatbot responses
-                    st.image("logo.png", width=30, caption="ChatBot")
-                st.write(query if i % 2 == 0 else answer)
+                if i % 2 == 0:
+                    st.image("path_to_your_logo_image.png", width=30)  # Display logo for user messages
+                message(query, is_user=True, key=f"{i}_user")
+                
+                if i % 2 == 1:
+                    st.image("path_to_your_logo_image.png", width=30)  # Display logo for bot messages
+                message(answer, key=f"{i}_answer")
     
         # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
