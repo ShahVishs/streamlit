@@ -80,9 +80,9 @@ response_container = st.container()
 container = st.container()
 chat_history = []  # Store the conversation history here
 
-def conversational_chat(query):
-    result = qa({"question": query, "chat_history": chat_history})
-    chat_history.append((query, result["answer"]))  # Append to chat_history
+def conversational_chat(question):
+    result = qa({"question": question, "chat_history": st.session_state.history})
+    st.session_state.history.append((question, result["answer"]))
     return result["answer"]
 
 # Streamlit main code
@@ -102,7 +102,7 @@ with container:
         
         # Display conversation history with proper differentiation
         with response_container:
-            for i, (query, answer) in enumerate(chat_history):
+            for i, (query, answer) in enumerate(chat_history):  # Use chat_history instead of st.session_state.history
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
         
@@ -112,3 +112,6 @@ with container:
                 save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+            
+        # Clear the user input field after submission
+        user_input = ""
