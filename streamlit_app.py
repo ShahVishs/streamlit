@@ -38,6 +38,7 @@ db_name = db_secrets["dbname"]
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
+Base = declarative_base()
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
     id = Column(Integer, primary_key=True)
