@@ -18,6 +18,14 @@ import base64
 from datetime import datetime
 from pytz import timezone
 import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+# Your Streamlit Cloud environment variable for the database URI
+SQLALCHEMY_DATABASE_URI = st.secrets["postgresql://postgres:root@localhost:5432/smai_local"]
+
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
+Session = sessionmaker(bind=engine)
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -40,28 +48,32 @@ if 'past' not in st.session_state:
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
     
-def create_db_connection():
-    connection = psycopg2.connect(
-        host="localhost",
-        port=5432,
-        database="smai_local",
-        user="postgres",
-        password="root"
-    )
-    return connection
+# def create_db_connection():
+#     connection = psycopg2.connect(
+#         host="localhost",
+#         port=5432,
+#         database="smai_local",
+#         user="postgres",
+#         password="root"
+#     )
+#     return connection
 
 def save_chat_to_postgresql(user_name, user_input, output, timestamp):
     try:
-        connection = create_db_connection()
-        cursor = connection.cursor()
+        session = Session()
+        connection = session.connection()
 
-        insert_query = "INSERT INTO chat_history (timestamp, user_name, user_input, output) VALUES (%s, %s, %s, %s)"
-        data = (timestamp, user_name, user_input, output)
-        cursor.execute(insert_query, data)
+        insert_query = "INSERT INTO chat_history (timestamp, user_name, user_input, output) VALUES (:timestamp, :user_name, :user_input, :output)"
+        data = {
+            "timestamp": timestamp,
+            "user_name": user_name,
+            "user_input": user_input,
+            "output": output
+        }
+        connection.execute(insert_query, data)
 
-        connection.commit()
-        cursor.close()
-        connection.close()
+        session.commit()
+        session.close()
         # st.success("Data saved to PostgreSQL!")
     except Exception as e:
         st.error(f"Error saving data to PostgreSQL: {str(e)}")
