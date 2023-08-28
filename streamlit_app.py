@@ -33,7 +33,7 @@ db_password = db_secrets["password"]
 db_host = db_secrets["host"]
 db_port = db_secrets["port"]
 db_name = db_secrets["dbname"]
-Base = declarative_base()
+
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
