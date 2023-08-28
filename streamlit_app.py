@@ -53,7 +53,7 @@ def create_table_if_not_exists():
             conn.commit()
     except Exception as e:
         st.error(f"Error creating table: {e}")
-
+Base = declarative_base()
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
     id = Column(Integer, primary_key=True)
