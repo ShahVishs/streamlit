@@ -21,15 +21,16 @@ import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Access individual components from secrets
-db_username = st.secrets["database"]["username"]
-db_password = st.secrets["database"]["password"]
-db_host = st.secrets["database"]["host"]
-db_port = st.secrets["database"]["port"]
-db_name = st.secrets["database"]["database_name"]
+db_username = st.secrets["db_username"]
+db_password = st.secrets["db_password"]
+db_host = st.secrets["db_host"]
+db_port = st.secrets["db_port"]
+db_name = st.secrets["db_name"]
 
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
@@ -37,6 +38,21 @@ SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{
 # Create SQLAlchemy engine and session
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
+
+# Define SQLAlchemy model
+Base = declarative_base()
+
+class ChatHistory(Base):
+    __tablename__ = 'chat_history'
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(String)
+    user_name = Column(String)
+    user_input = Column(String)
+    output = Column(String)
+
+# Create the table
+Base.metadata.create_all(engine)
+
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
