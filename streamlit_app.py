@@ -37,23 +37,6 @@ db_name = db_secrets["dbname"]
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 
-# Define a function to create the table if it doesn't exist
-def create_table_if_not_exists(connection):
-    try:
-        with connection.cursor() as cur:
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS chat_history (
-                    id SERIAL PRIMARY KEY,
-                    timestamp TIMESTAMP,
-                    user_name TEXT,
-                    user_input TEXT,
-                    output TEXT
-                )
-            """)
-            connection.commit()
-    except Exception as e:
-        st.error(f"Error creating table: {e}")
-
 Base = declarative_base()
 
 class ChatHistory(Base):
@@ -64,6 +47,7 @@ class ChatHistory(Base):
     user_input = Column(String)
     output = Column(String)
 
+# Initialize connection
 try:
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
     Base.metadata.create_all(engine)
@@ -123,10 +107,7 @@ def save_chat_to_postgresql(user_name, user_input, output, timestamp):
     except Exception as e:
         st.error(f"Error saving data to PostgreSQL: {str(e)}")
         
-# Define the init_connection function to establish a connection
-@st.cache(allow_output_mutation=True, hash_funcs={psycopg2.extensions.connection: id})
-def init_connection():
-    return psycopg2.connect(**st.secrets["postgres"])
+
     
 # Initialize conversation history with intro_prompt
 custom_template = """You are a business development manager role \
@@ -161,28 +142,23 @@ with container:
         if user_name:
             st.session_state.user_name = user_name
             
-    # Initialize the database connection directly here
-    conn = init_connection()
-    
-    # Create the table if it doesn't exist
-    create_table_if_not_exists(conn)  # Pass the connection to the function
-    
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
-    #if submit_button and user_input:
     if submit_button and user_input:
         output = conversational_chat(user_input)
         utc_now = datetime.now(timezone('UTC'))
     
         with response_container:
+            st.session_state.chat_history.append((user_input, output))  # Add the conversation to chat history
+            
             for i, (query, answer) in enumerate(st.session_state.chat_history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
     
-        if st.session_state.user_name:
-            try:
-                save_chat_to_postgresql(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+            if st.session_state.user_name:
+                try:
+                    save_chat_to_postgresql(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
