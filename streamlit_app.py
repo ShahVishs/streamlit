@@ -161,15 +161,15 @@ with container:
         if user_name:
             st.session_state.user_name = user_name
             
-    # Initialize the database connection
-    conn = init_connection()
-    
     # Create the table if it doesn't exist
     create_table_if_not_exists()
 
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
+    
+    # Initialize the database connection directly here
+    conn = init_connection()
     
     #if submit_button and user_input:
     if submit_button and user_input:
