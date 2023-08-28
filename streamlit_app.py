@@ -20,9 +20,14 @@ from pytz import timezone
 import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import streamlit as st
 
-# Your Streamlit Cloud environment variable for the database URI
-SQLALCHEMY_DATABASE_URI = st.secrets["postgresql://postgres:root@localhost:5432/smai_local"]
+# Access the secret by providing the secret name/key
+database_uri_secret_key = "postgresql://postgres:root@localhost:5432/smai_local"
+SQLALCHEMY_DATABASE_URI = st.secrets[database_uri_secret_key]
+
+# # Your Streamlit Cloud environment variable for the database URI
+# SQLALCHEMY_DATABASE_URI = st.secrets["postgresql://postgres:root@localhost:5432/smai_local"]
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
