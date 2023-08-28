@@ -21,14 +21,20 @@ import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-# Access the secret by providing the secret name/key
-database_uri_secret_key = "postgresql://postgres:root@localhost:5432/smai_local"
-SQLALCHEMY_DATABASE_URI = st.secrets[database_uri_secret_key]
+# Access individual components from secrets
+db_username = st.secrets["database"]["username"]
+db_password = st.secrets["database"]["password"]
+db_host = st.secrets["database"]["host"]
+db_port = st.secrets["database"]["port"]
+db_name = st.secrets["database"]["database_name"]
 
-# # Your Streamlit Cloud environment variable for the database URI
-# SQLALCHEMY_DATABASE_URI = st.secrets["postgresql://postgres:root@localhost:5432/smai_local"]
+# Construct the connection URI
+SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 
+# Create SQLAlchemy engine and session
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
