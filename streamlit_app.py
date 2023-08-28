@@ -38,27 +38,32 @@ if 'past' not in st.session_state:
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-def save_chat_to_google_sheets(user_name, user_input, output, timestamp):
-    try:
-        # Connect to Google Sheets using service account credentials
-        credentials = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"],
-            scopes=["https://www.googleapis.com/auth/spreadsheets"],
-        )
-        gc = gspread.authorize(credentials)
-        
-        # Get the Google Sheet by URL
-        sheet_url = st.secrets["public_gsheets_url"]
-        sheet = gc.open_by_url(sheet_url)
-        
-        # Select the desired worksheet
-        worksheet = sheet.get_worksheet(0)  # Replace 0 with the index of your desired worksheet
     
-        data = [timestamp, user_name, user_input, output]
-        worksheet.append_row(data)
-        # st.success("Data saved to Google Sheets!")
+def create_db_connection():
+    connection = psycopg2.connect(
+        host="localhost",
+        port=5432,
+        database="smai_local",
+        user="postgres",
+        password="root"
+    )
+    return connection
+
+def save_chat_to_postgresql(user_name, user_input, output, timestamp):
+    try:
+        connection = create_db_connection()
+        cursor = connection.cursor()
+
+        insert_query = "INSERT INTO chat_history (timestamp, user_name, user_input, output) VALUES (%s, %s, %s, %s)"
+        data = (timestamp, user_name, user_input, output)
+        cursor.execute(insert_query, data)
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+        # st.success("Data saved to PostgreSQL!")
     except Exception as e:
-        st.error(f"Error saving data to Google Sheets: {str(e)}")
+        st.error(f"Error saving data to PostgreSQL: {str(e)}")
         
 # Initialize conversation history with intro_prompt
 custom_template = """You are a business development manager role \
@@ -96,22 +101,19 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
-    if submit_button and user_input:
+    #if submit_button and user_input:
+     if submit_button and user_input:
         output = conversational_chat(user_input)
-        # Get the current UTC timestamp
         utc_now = datetime.now(timezone('UTC'))
-        
-        
-      # Display conversation history with proper differentiation
+    
         with response_container:
             for i, (query, answer) in enumerate(st.session_state.chat_history):
                 message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                 message(answer, key=f"{i}_answer", avatar_style="thumbs")
     
-        # Save conversation to Google Sheets along with user name and UTC timestamp
         if st.session_state.user_name:
             try:
-                save_chat_to_google_sheets(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
+                save_chat_to_postgresql(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
             
