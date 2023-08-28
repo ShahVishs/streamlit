@@ -34,12 +34,6 @@ db_name = st.secrets["db_name"]["value"]
 
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
-
-# Create SQLAlchemy engine and session
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-Base = declarative_base()  # Add this line if it's not already present
-Session = sessionmaker(bind=engine)
-
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
     id = Column(Integer, primary_key=True)
@@ -47,9 +41,16 @@ class ChatHistory(Base):
     user_name = Column(String)
     user_input = Column(String)
     output = Column(String)
+try:
+    engine = create_engine(SQLALCHEMY_DATABASE_URI)
+    Base.metadata.create_all(engine)
+except Exception as e:
+    st.error(f"An error occurred while connecting to the database: {e}")
 
-# Create the table
-Base.metadata.create_all(engine)
+
+
+# # Create the table
+# Base.metadata.create_all(engine)
 
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
