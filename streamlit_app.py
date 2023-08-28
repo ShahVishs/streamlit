@@ -89,20 +89,13 @@ if 'user_name' not in st.session_state:
 
 def save_chat_to_postgresql(user_name, user_input, output, timestamp):
     try:
-        session = Session()
-        connection = session.connection()
+        insert_query = "INSERT INTO chat_history (timestamp, user_name, user_input, output) VALUES (%s, %s, %s, %s)"
+        data = (timestamp, user_name, user_input, output)
 
-        insert_query = "INSERT INTO chat_history (timestamp, user_name, user_input, output) VALUES (:timestamp, :user_name, :user_input, :output)"
-        data = {
-            "timestamp": timestamp,
-            "user_name": user_name,
-            "user_input": user_input,
-            "output": output
-        }
-        connection.execute(insert_query, data)
+        with conn.cursor() as cur:
+            cur.execute(insert_query, data)
+            conn.commit()
 
-        session.commit()
-        session.close()
         # st.success("Data saved to PostgreSQL!")
     except Exception as e:
         st.error(f"Error saving data to PostgreSQL: {str(e)}")
@@ -149,7 +142,7 @@ with container:
     if submit_button and user_input:
         output = conversational_chat(user_input)
         utc_now = datetime.now(timezone('UTC'))
-    
+
         with response_container:
             st.session_state.chat_history.append((user_input, output))  # Add the conversation to chat history
             
