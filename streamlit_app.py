@@ -27,11 +27,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # Access individual components from secrets
-db_username = st.secrets["db_username"]["value"]
-db_password = st.secrets["db_password"]["value"]
-db_host = st.secrets["db_host"]["value"]
-db_port = st.secrets["db_port"]["value"]
-db_name = st.secrets["db_name"]["value"]
+db_username = st.secrets["postgres"]["user"]
+db_password = st.secrets["postgres"]["password"]
+db_host = st.secrets["postgres"]["host"]
+db_port = st.secrets["postgres"]["port"]
+db_name = st.secrets["postgres"]["dbname"]
 
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
