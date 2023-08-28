@@ -26,18 +26,23 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-# Access individual components from secrets
+# Access PostgreSQL connection details from secrets
 db_secrets = st.secrets["postgres"]
 db_username = db_secrets["user"]
 db_password = db_secrets["password"]
 db_host = db_secrets["host"]
 db_port = db_secrets["port"]
 db_name = db_secrets["dbname"]
-
+Base = declarative_base()
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 
-Base = declarative_base()
+# Initialize the PostgreSQL connection
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+
+
 
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
