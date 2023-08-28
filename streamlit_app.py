@@ -21,10 +21,11 @@ import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+
 # Access individual components from secrets
 db_username = st.secrets["db_username"]["value"]
 db_password = st.secrets["db_password"]["value"]
@@ -34,23 +35,37 @@ db_name = st.secrets["db_name"]["value"]
 
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+
+# Define a function to create the table if it doesn't exist
+def create_table_if_not_exists():
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS chat_history (
+                    id SERIAL PRIMARY KEY,
+                    timestamp TIMESTAMP,
+                    user_name TEXT,
+                    user_input TEXT,
+                    output TEXT
+                )
+            """)
+            conn.commit()
+    except Exception as e:
+        st.error(f"Error creating table: {e}")
+
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
     id = Column(Integer, primary_key=True)
-    timestamp = Column(String)
+    timestamp = Column(TIMESTAMP)
     user_name = Column(String)
     user_input = Column(String)
     output = Column(String)
+
 try:
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
     Base.metadata.create_all(engine)
 except Exception as e:
     st.error(f"An error occurred while connecting to the database: {e}")
-
-
-
-# # Create the table
-# Base.metadata.create_all(engine)
 
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
@@ -136,6 +151,13 @@ with container:
         user_name = st.text_input("Your name:")
         if user_name:
             st.session_state.user_name = user_name
+            
+    # Initialize the database connection
+    conn = init_connection()
+    
+    # Create the table if it doesn't exist
+    create_table_if_not_exists()
+
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
