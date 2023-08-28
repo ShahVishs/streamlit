@@ -53,7 +53,9 @@ def create_table_if_not_exists():
             conn.commit()
     except Exception as e:
         st.error(f"Error creating table: {e}")
+
 Base = declarative_base()
+
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
     id = Column(Integer, primary_key=True)
@@ -65,6 +67,7 @@ class ChatHistory(Base):
 try:
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
     Base.metadata.create_all(engine)
+    conn = engine.raw_connection()  # Get the raw connection for psycopg2
 except Exception as e:
     st.error(f"An error occurred while connecting to the database: {e}")
 
@@ -120,6 +123,11 @@ def save_chat_to_postgresql(user_name, user_input, output, timestamp):
     except Exception as e:
         st.error(f"Error saving data to PostgreSQL: {str(e)}")
         
+# Define the init_connection function to establish a connection
+@st.cache(allow_output_mutation=True, hash_funcs={psycopg2.extensions.connection: id})
+def init_connection():
+    return psycopg2.connect(**st.secrets["postgres"])
+    
 # Initialize conversation history with intro_prompt
 custom_template = """You are a business development manager role \
 working in a car dealership you get a text enquiry regarding inventry, business details and finance. 
