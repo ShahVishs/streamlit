@@ -17,6 +17,7 @@ from google.oauth2 import service_account
 import base64
 from datetime import datetime
 from pytz import timezone
+import psycopg2
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -102,7 +103,7 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     
     #if submit_button and user_input:
-     if submit_button and user_input:
+    if submit_button and user_input:
         output = conversational_chat(user_input)
         utc_now = datetime.now(timezone('UTC'))
     
@@ -116,6 +117,3 @@ with container:
                 save_chat_to_postgresql(st.session_state.user_name, user_input, output, utc_now.strftime('%Y-%m-%d-%H-%M-%S'))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-            
-        # # Clear the user input field after submission
-        # user_input = "
