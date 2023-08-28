@@ -38,9 +38,9 @@ db_name = db_secrets["dbname"]
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 # Define a function to create the table if it doesn't exist
-def create_table_if_not_exists():
+def create_table_if_not_exists(connection):
     try:
-        with conn.cursor() as cur:
+        with connection.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS chat_history (
                     id SERIAL PRIMARY KEY,
@@ -50,7 +50,7 @@ def create_table_if_not_exists():
                     output TEXT
                 )
             """)
-            conn.commit()
+            connection.commit()
     except Exception as e:
         st.error(f"Error creating table: {e}")
 
@@ -161,15 +161,15 @@ with container:
         if user_name:
             st.session_state.user_name = user_name
             
+    # Initialize the database connection directly here
+    conn = init_connection()
+    
     # Create the table if it doesn't exist
-    create_table_if_not_exists()
-
+    create_table_if_not_exists(conn)  # Pass the connection to the function
+    
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
-    
-    # Initialize the database connection directly here
-    conn = init_connection()
     
     #if submit_button and user_input:
     if submit_button and user_input:
