@@ -88,6 +88,9 @@ if 'user_name' not in st.session_state:
 
 def save_chat_to_postgresql(user_name, user_input, output, timestamp):
     try:
+        # Create a new connection
+        conn = engine.raw_connection()
+        
         insert_query = "INSERT INTO chat_history (timestamp, user_name, user_input, output) VALUES (%s, %s, %s, %s)"
         data = (timestamp, user_name, user_input, output)
 
