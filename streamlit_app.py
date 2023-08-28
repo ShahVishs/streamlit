@@ -24,23 +24,21 @@ import streamlit as st
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.ext.declarative import declarative_base
 # Access individual components from secrets
-db_username = st.secrets["db_username"]
-db_password = st.secrets["db_password"]
-db_host = st.secrets["db_host"]
-db_port = st.secrets["db_port"]
-db_name = st.secrets["db_name"]
+db_username = st.secrets["db_username"]["value"]
+db_password = st.secrets["db_password"]["value"]
+db_host = st.secrets["db_host"]["value"]
+db_port = st.secrets["db_port"]["value"]
+db_name = st.secrets["db_name"]["value"]
 
 # Construct the connection URI
 SQLALCHEMY_DATABASE_URI = f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 # Create SQLAlchemy engine and session
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
+Base = declarative_base()  # Add this line if it's not already present
 Session = sessionmaker(bind=engine)
-
-# Define SQLAlchemy model
-Base = declarative_base()
 
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
