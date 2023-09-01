@@ -48,8 +48,15 @@ firebase_credentials = st.secrets["firebase"]["credentials_json"]
 
 if firebase_credentials:
     # Initialize Firebase with credentials
-    cred = credentials.Certificate(firebase_credentials)
-    firebase_admin.initialize_app(cred)
+    import json
+
+    try:
+        cred = credentials.Certificate(json.loads(firebase_credentials))
+        firebase_admin.initialize_app(cred)
+    except json.JSONDecodeError as e:
+        st.error(f"Error decoding JSON: {e}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 else:
     # Handle the case when the environment variable is not set
     st.error("Firebase credentials not found. Please configure the environment variable.")
