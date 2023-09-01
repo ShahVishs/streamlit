@@ -35,6 +35,8 @@ from pytz import timezone
 import os
 import firebase_admin
 from firebase_admin import credentials
+import firebase_admin
+from firebase_admin import credentials, firestore
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -46,17 +48,13 @@ retriever = vectorstore.as_retriever(search_type="similarity", k=8)
 # Load Firebase credentials from Streamlit secrets
 firebase_credentials = st.secrets["firebase"]["credentials_json"]
 
+# Load Firebase credentials from Streamlit secrets
+firebase_credentials = st.secrets["firebase"]["credentials_json"]
+
 if firebase_credentials:
     # Initialize Firebase with credentials
-    import json
-
-    try:
-        cred = credentials.Certificate(json.loads(firebase_credentials))
-        firebase_admin.initialize_app(cred)
-    except json.JSONDecodeError as e:
-        st.error(f"Error decoding JSON: {e}")
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    cred = credentials.Certificate(firebase_credentials)
+    firebase_admin.initialize_app(cred)
 else:
     # Handle the case when the environment variable is not set
     st.error("Firebase credentials not found. Please configure the environment variable.")
