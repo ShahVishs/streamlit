@@ -35,7 +35,14 @@ from pytz import timezone
 import os
 import firebase_admin
 from firebase_admin import credentials
-
+os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+st.image("socialai.jpg")
+file = r'dealer_1_inventry.csv'
+loader = CSVLoader(file_path=file)
+docs = loader.load()
+embeddings = OpenAIEmbeddings()
+vectorstore = FAISS.from_documents(docs, embeddings)
+retriever = vectorstore.as_retriever(search_type="similarity", k=8)
 # Check if the environment variable is set
 firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
 
