@@ -32,15 +32,16 @@ from firebase_admin import credentials, firestore
 from datetime import datetime
 from pytz import timezone
 
-# After initializing Firebase credentials
-# Load Firebase credentials from Streamlit secrets
-firebase_cred = credentials.Certificate(st.secrets["firebase"])
+# Check if the environment variable is set
+firebase_credentials = os.getenv("firebase")
 
-# Initialize the Firebase app
-firebase_admin.initialize_app(firebase_cred)
-
-# Add this line for debugging purposes
-st.write(st.secrets)
+if firebase_credentials:
+    # Initialize Firebase with the provided credentials
+    firebase_cred = credentials.Certificate(json.loads(firebase_credentials))
+    firebase_admin.initialize_app(firebase_cred)
+else:
+    # Handle the case when the environment variable is not set
+    st.error("Firebase credentials not found. Please configure the environment variable.")
 
 # Streamlit UI setup
 st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data.")
