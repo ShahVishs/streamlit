@@ -34,7 +34,7 @@ from pytz import timezone
 
 # After initializing Firebase credentials
 # Load Firebase credentials from Streamlit secrets
-firebase_cred = credentials.Certificate(st.secrets["firebase"]["credentials_json"])
+firebase_cred = credentials.Certificate(st.secrets["firebase"])
 
 # Initialize the Firebase app
 firebase_admin.initialize_app(firebase_cred)
