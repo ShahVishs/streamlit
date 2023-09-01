@@ -43,13 +43,13 @@ docs = loader.load()
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 retriever = vectorstore.as_retriever(search_type="similarity", k=8)
-# Check if the environment variable is set
-firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
+# Load Firebase credentials from Streamlit secrets
+firebase_credentials = st.secrets["firebase"]["credentials_json"]
 
 if firebase_credentials:
-    # Initialize Firebase with the provided credentials
-    firebase_cred = credentials.Certificate(json.loads(firebase_credentials))
-    firebase_admin.initialize_app(firebase_cred)
+    # Initialize Firebase with credentials
+    cred = credentials.Certificate(firebase_credentials)
+    firebase_admin.initialize_app(cred)
 else:
     # Handle the case when the environment variable is not set
     st.error("Firebase credentials not found. Please configure the environment variable.")
