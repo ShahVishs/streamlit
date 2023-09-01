@@ -32,8 +32,12 @@ from firebase_admin import credentials, firestore
 from datetime import datetime
 from pytz import timezone
 
+import os
+import firebase_admin
+from firebase_admin import credentials
+
 # Check if the environment variable is set
-firebase_credentials = os.getenv("firebase")
+firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
 
 if firebase_credentials:
     # Initialize Firebase with the provided credentials
