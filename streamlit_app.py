@@ -105,6 +105,8 @@ def save_chat_to_airtable(user_name, user_input, output):
         )
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
+        st.write(f"API URL: {airtable.api_url}")
+        st.write(f"Data to Insert: {user_name}, {user_input}, {output}")
 
 def conversational_chat(user_input):
     result = qa({"question": user_input, "chat_history": st.session_state.chat_history})
