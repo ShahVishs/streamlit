@@ -49,7 +49,7 @@ airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
 
 # Set the Airtable API key as an environment variable
 os.environ["AIRTABLE_API_KEY"] = airtable_api_key
-AIRTABLE_BASE_ID = "1 base"  # Replace with your actual base ID
+AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"  # Replace with your actual base ID
 AIRTABLE_TABLE_NAME = "Question_Answer_Data"  # Replace with your actual table name
 
 
