@@ -27,16 +27,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, firestore
+
 from datetime import datetime
 from pytz import timezone
 
 import os
-import firebase_admin
-from firebase_admin import credentials
-import firebase_admin
-from firebase_admin import credentials, firestore
+
 from airtable import Airtable
 import os
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
