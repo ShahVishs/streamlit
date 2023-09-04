@@ -37,6 +37,8 @@ import firebase_admin
 from firebase_admin import credentials
 import firebase_admin
 from firebase_admin import credentials, firestore
+from airtable import Airtable
+import os
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 file = r'dealer_1_inventry.csv'
@@ -46,21 +48,11 @@ embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 retriever = vectorstore.as_retriever(search_type="similarity", k=8)
 
+# Access the Airtable API key from Streamlit secrets
+airtable_api_key = st.secrets["AIRTABLE_API_KEY"]
+AIRTABLE_BASE_ID = "1 base"  # Replace with your actual base ID
+AIRTABLE_TABLE_NAME = "Question_Answer_Data"  # Replace with your actual table name
 
-# Load Firebase credentials from Streamlit secrets
-firebase_credentials = st.secrets["firebase"]["credentials_json"]
-
-if firebase_credentials:
-   
-    firebase_credentials = json.loads(firebase_credentials_str)
-    
-    # Initialize Firebase with credentials
-    cred = credentials.Certificate(firebase_credentials)
-    firebase_admin.initialize_app(cred)
-
-else:
-    # Handle the case when the environment variable is not set
-    st.error("Firebase credentials not found. Please configure the environment variable.")
 
 # Streamlit UI setup
 st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data.")
@@ -99,19 +91,21 @@ qa = ConversationalRetrievalChain.from_llm(
 response_container = st.container()
 container = st.container()
 
-def save_chat_to_firebase(user_name, user_input, output):
-    db = firestore.client()
-    chat_ref = db.collection('chats')  # Replace 'chats' with your Firestore collection name
+# Initialize the Airtable client
+airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_key)
 
-    chat_data = {
-        'user_name': user_name,
-        'user_input': user_input,
-        'output': output,
-        'timestamp': firestore.SERVER_TIMESTAMP  # Use Firebase server timestamp
-    }
-
-    # Add the chat data to Firestore
-    chat_ref.add(chat_data)
+# Function to save chat data to Airtable
+def save_chat_to_airtable(user_name, user_input, output):
+    try:
+        airtable.insert(
+            {
+                "User Name": user_name,
+                "User Input": user_input,
+                "Output": output,
+            }
+        )
+    except Exception as e:
+        st.error(f"An error occurred while saving data to Airtable: {e}")
 
 def conversational_chat(user_input):
     result = qa({"question": user_input, "chat_history": st.session_state.chat_history})
@@ -131,18 +125,18 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
-        output = conversational_chat(user_input)
-        utc_now = datetime.now(timezone('UTC'))
-
-        with response_container:
-            st.session_state.chat_history.append((user_input, output))  # Add the conversation to chat history
-            
-            for i, (query, answer) in enumerate(st.session_state.chat_history):
-                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-                message(answer, key=f"{i}_answer", avatar_style="thumbs")
-    
-            if st.session_state.user_name:
-                try:
-                    save_chat_to_firebase(st.session_state.user_name, user_input, output)
-                except Exception as e:
-                    st.error(f"An error occurred: {e}")
+       output = conversational_chat(user_input)
+       utc_now = datetime.now(timezone('UTC'))
+   
+       with response_container:
+           st.session_state.chat_history.append((user_input, output))  # Add the conversation to chat history
+   
+           for i, (query, answer) in enumerate(st.session_state.chat_history):
+               message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+               message(answer, key=f"{i}_answer", avatar_style="thumbs")
+   
+           if st.session_state.user_name:
+               try:
+                   save_chat_to_airtable(st.session_state.user_name, user_input, output)
+               except Exception as e:
+                   st.error(f"An error occurred: {e}")
