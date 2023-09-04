@@ -77,11 +77,12 @@ def save_chat_to_airtable(user_name, user_input, output):
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
 
+
+# Function to conduct a conversation with the model
 def conversational_chat(user_input):
     result = qa({"question": user_input, "chat_history": st.session_state.chat_history})
     st.session_state.chat_history.append((user_input, result["answer"]))
     return result["answer"]
-
 
 with container:
     if st.session_state.user_name is None:
@@ -89,21 +90,21 @@ with container:
         if user_name:
             st.session_state.user_name = user_name
             
-    with st.form(key='my_form'):
+    with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
-       output = conversational_chat(user_input)
-       utc_now = datetime.now(timezone('UTC'))
+        output = conversational_chat(user_input)
+        utc_now = datetime.now(timezone('UTC'))
+        
+        with response_container:
+            for i, (query, answer) in enumerate(st.session_state.chat_history):
+                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+                message(answer, key=f"{i}_answer", avatar_style="thumbs")
    
-       with response_container:
-           for i, (query, answer) in enumerate(st.session_state.chat_history):
-               message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-               message(answer, key=f"{i}_answer", avatar_style="thumbs")
-   
-           if st.session_state.user_name:
-               try:
-                   save_chat_to_airtable(st.session_state.user_name, user_input, output)
-               except Exception as e:
-                   st.error(f"An error occurred: {e}")
+            if st.session_state.user_name:
+                try:
+                    save_chat_to_airtable(st.session_state.user_name, user_input, output)
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
