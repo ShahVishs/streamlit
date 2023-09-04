@@ -129,8 +129,7 @@ with container:
        utc_now = datetime.now(timezone('UTC'))
    
        with response_container:
-           st.session_state.chat_history.append((user_input, output))  # Add the conversation to chat history
-   
+           # Do not append here
            for i, (query, answer) in enumerate(st.session_state.chat_history):
                message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
                message(answer, key=f"{i}_answer", avatar_style="thumbs")
