@@ -89,7 +89,7 @@ with container:
         if user_name:
             st.session_state.user_name = user_name
             
-    with st.form(key='my_form', clear_on_submit=True):
+    with st.form(key='my_form'):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
