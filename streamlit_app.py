@@ -44,8 +44,11 @@ embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 retriever = vectorstore.as_retriever(search_type="similarity", k=8)
 
-# Access the Airtable API key from Streamlit secrets
-airtable_api_key = st.secrets["AIRTABLE_API_KEY"]
+# Access the Airtable API key from secrets.toml
+airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
+
+# Set the Airtable API key as an environment variable
+os.environ["AIRTABLE_API_KEY"] = airtable_api_key
 AIRTABLE_BASE_ID = "1 base"  # Replace with your actual base ID
 AIRTABLE_TABLE_NAME = "Question_Answer_Data"  # Replace with your actual table name
 
