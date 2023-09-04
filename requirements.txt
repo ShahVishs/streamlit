@@ -12,4 +12,4 @@ pytz
 psycopg2-binary
 SQLAlchemy
 google-auth
-firebase-admin
+airtable-python-wrapper
