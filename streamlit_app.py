@@ -65,11 +65,13 @@ airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_
 
 def save_chat_to_airtable(user_name, user_input, output):
     try:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Get the current timestamp
         airtable.insert(
             {
                 "username": user_name,
                 "question": user_input,
                 "answer": output,
+                "timestamp": timestamp,  
             }
         )
     except Exception as e:
