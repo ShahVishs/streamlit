@@ -68,13 +68,13 @@ embeddings = OpenAIEmbeddings()
 vectorstore_1 = FAISS.from_documents(docs_1, embeddings)
 retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
 
-file_2 = r'appointment.csv'
-loader = CSVLoader(file_path=file_2)
-docs_2 = loader.load()
-embeddings = OpenAIEmbeddings()
-vectorstore_2 = FAISS.from_documents(docs_2, embeddings)
+# file_2 = r'appointment.csv'
+# loader = CSVLoader(file_path=file_2)
+# docs_2 = loader.load()
+# embeddings = OpenAIEmbeddings()
+# vectorstore_2 = FAISS.from_documents(docs_2, embeddings)
 
-retriever_2 = vectorstore_2.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
+# retriever_2 = vectorstore_2.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
 
 
 # Create the first tool
@@ -84,16 +84,16 @@ tool1 = create_retriever_tool(
      "Searches and returns documents regarding the car inventory and Input should be a single string strictly."
 )
 
-# Create the second tool
-tool2 = create_retriever_tool(
-    retriever_2, 
-    "search_appointment",
-#     "Searches and returns documents related to the appointments scheduling."
-    "Use to schedule an appointment for a given date and time. The input to this tool should be a comma separated\
-    list of 2 strings: date and time in format: mm/dd/yy, hh,\
-    convert date and time to these formats. For example, `12/31/23, 10:00` \
-    would be the input for Dec 31'st 2023 at 10am."
-)
+# # Create the second tool
+# tool2 = create_retriever_tool(
+#     retriever_2, 
+#     "search_appointment",
+# #     "Searches and returns documents related to the appointments scheduling."
+#     "Use to schedule an appointment for a given date and time. The input to this tool should be a comma separated\
+#     list of 2 strings: date and time in format: mm/dd/yy, hh,\
+#     convert date and time to these formats. For example, `12/31/23, 10:00` \
+#     would be the input for Dec 31'st 2023 at 10am."
+# )
 
 # Create the third tool
 tool3 = create_retriever_tool(
@@ -103,12 +103,12 @@ tool3 = create_retriever_tool(
 )
 
 # Append all tools to the tools list
-tools = [tool1, tool2, tool3]
+tools = [tool1, tool3]
 
 # airtable
 airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
 os.environ["AIRTABLE_API_KEY"] = airtable_api_key
-AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"  
+AIRTABLE_BASE_ID = "apphcpoXpCsorEcNx"  
 AIRTABLE_TABLE_NAME = "Question_Answer_Data" 
 
 # Streamlit UI setup
