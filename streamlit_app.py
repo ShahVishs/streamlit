@@ -34,7 +34,8 @@ from langchain.agents import AgentExecutor
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 
-datetime.datetime.now()
+# datetime.datetime.now()
+datetime.now()
 # Get the current date in "%m/%d/%y" format
 current_date = datetime.date.today().strftime("%m/%d/%y")
 
