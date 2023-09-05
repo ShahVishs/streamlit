@@ -37,11 +37,11 @@ st.image("socialai.jpg")
 # datetime.datetime.now()
 datetime.now()
 # Get the current date in "%m/%d/%y" format
-current_date = datetime.date.today().strftime("%m/%d/%y")
-
+# current_date = datetime.date.today().strftime("%m/%d/%y")
+current_date = datetime.today().strftime("%m/%d/%y")
 # Get the day of the week (0: Monday, 1: Tuesday, ..., 6: Sunday)
-day_of_week = datetime.date.today().weekday()
-
+# day_of_week = datetime.date.today().weekday()
+day_of_week = datetime.today().weekday()
 # Convert the day of the week to a string representation
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 current_day = days[day_of_week]
