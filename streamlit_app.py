@@ -126,7 +126,7 @@ with st.form(key='my_form', clear_on_submit=True):
         st.session_state.chat_history.append((user_input, "AI's response here."))
     submit_button = st.form_submit_button(label='Send')
 
-# Rest of your Streamlit app...
+
 
 # Create a Streamlit sidebar to display previous sessions
 st.sidebar.header("Previous Sessions")
@@ -301,10 +301,6 @@ with container:
             
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-        if user_input:
-            st.write(f"**User:** {user_input}")
-            # Add the user's question to the current session's chat history
-            st.session_state.chat_history.append((user_input, "AI's response here."))
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
