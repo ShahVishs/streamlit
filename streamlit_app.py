@@ -161,7 +161,17 @@ if st.sidebar.button("Clear Current Chat History"):
 if st.sidebar.button("Refresh Chat History"):
     session_key = f"{st.session_state.user_name}_{current_date}"
     if session_key in st.session_state.chat_histories:
-        st.session_state.chat_histories[session_key] = []
+        # Save the current chat history to a file with a name based on chat content
+        current_chat = st.session_state.chat_history
+        if current_chat:
+            file_name = "_".join(current_chat[-1]).replace(" ", "_").replace("?", "").replace(":", "")
+            file_name = f"{file_name}.txt"
+            with open(file_name, "w") as file:
+                for item in current_chat:
+                    file.write(f"User: {item[0]}\nAssistant: {item[1]}\n\n")
+
+        # Clear the current chat session history
+        st.session_state.chat_history = []
 
         # Retrieve and display the previous chat history from Airtable
         try:
