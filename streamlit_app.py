@@ -242,12 +242,12 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
-	if submit_button and user_input:
-		    output = conversational_chat(user_input)
-		    st.session_state.chat_history.append((user_input, output))
-		
+    if submit_button and user_input:
+	    output = conversational_chat(user_input)
+	    st.session_state.chat_history.append((user_input, output))
+
 	# Save the current session data to past sessions
-	if st.session_state.user_name and st.session_state.chat_history:
+    if st.session_state.user_name and st.session_state.chat_history:
 	    current_session_data = {
 		'user_name': st.session_state.user_name,
 		'chat_history': st.session_state.chat_history
