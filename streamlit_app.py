@@ -120,8 +120,8 @@ if selected_session:
     st.header(selected_session)
     
     for question, answer in selected_session_data["chat_history"]:
-        st.markdown(f"**User:** {question}")
-        st.markdown(f"**AI:** {answer}")
+        st.write(f"**User:** {question}")
+        st.write(f"**AI:** {answer}")
 
 # Create a Streamlit button for starting a new session
 if st.button("Refresh Session"):
