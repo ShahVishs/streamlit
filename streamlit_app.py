@@ -98,11 +98,8 @@ if 'chat_history' not in st.session_state:
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-# Determine if this is a completely new session or returning to a previous one
-completely_new_session = st.button("Start New Session")
-
-# If it's a completely new session or there is no previous session, ask for the user's name
-if completely_new_session or not past_sessions:
+# Check if the user's name is not set, then ask for the name
+if st.session_state.user_name is None:
     user_name = st.text_input("Your name:")
     if user_name:
         st.session_state.user_name = user_name
@@ -126,9 +123,6 @@ if st.button("Refresh Session"):
 # Display a list of session names
 selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
 
-# Display the selected session's chat history in the main area
-st.title("Chat Session History")
-
 if selected_session:
     session_index = int(selected_session.split()[-1]) - 1
     selected_session_data = past_sessions[session_index]
@@ -138,7 +132,6 @@ if selected_session:
     for question, answer in selected_session_data["chat_history"]:
         st.write(f"**User:** {question}")
         st.write(f"**AI:** {answer}")
-
 file_1 = r'dealer_1_inventry.csv'
 loader = CSVLoader(file_path=file_1)
 docs_1 = loader.load()
