@@ -99,8 +99,29 @@ def load_previous_sessions():
 past_sessions = load_previous_sessions()
 
 # Initialize session state
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
+if 'current_session_index' not in st.session_state:
+    st.session_state.current_session_index = -1  # Start with no session selected
+
+# Create a Streamlit button for starting a new session
+if st.button("Start New Session"):
+    st.session_state.current_session_index = -1  # Reset the session index to start a new session
+
+# Display a list of session names
+selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
+
+# Determine the selected session index
+session_index = int(selected_session.split()[-1]) - 1 if selected_session else None
+
+# Initialize or reset chat history based on the selected session
+if session_index is not None:
+    if st.session_state.current_session_index != session_index:
+        st.session_state.current_session_index = session_index
+        if session_index >= 0:
+            st.session_state.chat_history = past_sessions[session_index]['chat_history']
+        else:
+            st.session_state.chat_history = []
+
+# Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
@@ -110,28 +131,10 @@ if st.session_state.user_name is None:
     if user_name:
         st.session_state.user_name = user_name
 
-# Create a Streamlit button for starting a new session
-if st.button("Refresh Session"):
-    # Save the current session and start a new one
-    current_session = {
-        'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history
-    }
-    
-    # Generate a unique session_id based on the timestamp
-    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-    
-    save_chat_session(current_session, session_id)
+# Display the selected session's chat history in the main area
+st.title("Chat Session History")
 
-    # Clear session state variables to start a new session
-    st.session_state.chat_history = []
-
-# Display a list of session names along with session IDs
-session_list = [f"Session {i + 1} ({past_sessions[i]['session_id']})" for i in range(len(past_sessions))]
-selected_session = st.sidebar.selectbox("Select a session:", session_list)
-
-if selected_session:
-    session_index = int(selected_session.split()[-1].split("(")[0].strip()) - 1
+if session_index is not None and session_index >= 0:
     selected_session_data = past_sessions[session_index]
     
     st.header(selected_session)
@@ -139,6 +142,7 @@ if selected_session:
     for question, answer in selected_session_data["chat_history"]:
         st.write(f"**User:** {question}")
         st.write(f"**AI:** {answer}")
+
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
