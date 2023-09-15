@@ -243,8 +243,16 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
-       output = conversational_chat(user_input)
-       # utc_now = datetime.utcnow()
+	    output = conversational_chat(user_input)
+	    st.session_state.chat_history.append((user_input, output))
+	
+	# Save the current session data to past sessions
+	if st.session_state.user_name and st.session_state.chat_history:
+	    current_session_data = {
+	        'user_name': st.session_state.user_name,
+	        'chat_history': st.session_state.chat_history
+	    }
+	    st.session_state.past.append(current_session_data)
    
        with response_container:
            for i, (query, answer) in enumerate(st.session_state.chat_history):
@@ -256,10 +264,3 @@ with container:
                    save_chat_to_airtable(st.session_state.user_name, user_input, output)
                except Exception as e:
                    st.error(f"An error occurred: {e}")
-# Save the current session data to past sessions
-if st.session_state.user_name and st.session_state.chat_history:
-    current_session_data = {
-        'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history
-    }
-    st.session_state.past.append(current_session_data)
