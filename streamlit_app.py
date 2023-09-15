@@ -53,8 +53,8 @@ day_of_the_week = current_day
 
 business_details_text = [
     "working days: all Days except sunday",
-    "working hours: 9 am to 7 pm"
-    "Phone: (555) 123-4567"
+    "working hours: 9 am to 7 pm",
+    "Phone: (555) 123-4567",
     "Address: 567 Oak Avenue, Anytown, CA 98765, Email: jessica.smith@example.com",
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
@@ -66,38 +66,18 @@ loader = CSVLoader(file_path=file_1)
 docs_1 = loader.load()
 embeddings = OpenAIEmbeddings()
 vectorstore_1 = FAISS.from_documents(docs_1, embeddings)
-retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
-
-# file_2 = r'appointment.csv'
-# loader = CSVLoader(file_path=file_2)
-# docs_2 = loader.load()
-# embeddings = OpenAIEmbeddings()
-# vectorstore_2 = FAISS.from_documents(docs_2, embeddings)
-
-# retriever_2 = vectorstore_2.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
-
+retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})  # check without similarity search and k=8
 
 # Create the first tool
 tool1 = create_retriever_tool(
-    retriever_1, 
-     "search_car_dealership_inventory",
-     "Searches and returns documents regarding the car inventory and Input should be a single string strictly."
+    retriever_1,
+    "search_car_dealership_inventory",
+    "Searches and returns documents regarding the car inventory and Input should be a single string strictly."
 )
-
-# # Create the second tool
-# tool2 = create_retriever_tool(
-#     retriever_2, 
-#     "search_appointment",
-# #     "Searches and returns documents related to the appointments scheduling."
-#     "Use to schedule an appointment for a given date and time. The input to this tool should be a comma separated\
-#     list of 2 strings: date and time in format: mm/dd/yy, hh,\
-#     convert date and time to these formats. For example, `12/31/23, 10:00` \
-#     would be the input for Dec 31'st 2023 at 10am."
-# )
 
 # Create the third tool
 tool3 = create_retriever_tool(
-    retriever_3, 
+    retriever_3,
     "search_business_details",
     "Searches and returns documents related to business working days and hours, location and address details."
 )
@@ -108,32 +88,26 @@ tools = [tool1, tool3]
 # airtable
 airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
 os.environ["AIRTABLE_API_KEY"] = airtable_api_key
-AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"  
-AIRTABLE_TABLE_NAME = "Question_Answer_Data" 
+AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"
+AIRTABLE_TABLE_NAME = "Question_Answer_Data"
+airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_key)
+
 # Streamlit UI setup
-st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data. Appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv)")
+st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventory, Business details, Financing and Discounts and Offers related questions. [Here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is an inventory dataset to explore and play with the data. The appointment dataset is not available in this example.")
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-if 'generated' not in st.session_state:
-    st.session_state.generated = []
-if 'past' not in st.session_state:
-    st.session_state.past = []
-
-# Add this code to initialize chat_histories
 if 'chat_histories' not in st.session_state:
     st.session_state.chat_histories = {}
-
-# Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature = 0)
-langchain.debug=True
+llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
+langchain.debug = True
 memory_key = "history"
 memory = AgentTokenBufferMemory(memory_key=memory_key, llm=llm)
-template=(
-"""You're the Business Development Manager at our car dealership./
+template = (
+    """You're the Business Development Manager at our car dealership./
 When responding to inquiries, please adhere to the following guidelines:
 Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred/
 make, model, new or used car, and trade-in, kindly engage by asking for these specifics./
@@ -147,12 +121,12 @@ Model :
 Make :
 Trim:
 scheduling Appointments: If the customer's inquiry lacks specific details such as their preferred/
-day, date or time kindly engage by asking for these specifics. {details} Use these details that is todays date and day /
-to find the appointment date from the users input and check for appointment availabity for that specific date and time. 
-If the appointment schedule is not available provide this 
-link: www.dummy_calenderlink.com to schedule appointment by the user himself. 
+day, date or time kindly engage by asking for these specifics. {details} Use these details that are today's date and day /
+to find the appointment date from the user's input and check for appointment availability for that specific date and time. 
+If the appointment schedule is not available, provide this 
+link: www.dummy_calenderlink.com to schedule an appointment by the user himself. 
 If appointment schedules are not available, you should send this link: www.dummy_calendarlink.com to the 
-costumer to schedule an appointment on your own.
+customer to schedule an appointment on your own.
 
 Encourage Dealership Visit: Our goal is to encourage customers to visit the dealership for test drives or/
 receive product briefings from our team. After providing essential information on the car's make, model,/
@@ -162,37 +136,31 @@ for a comprehensive product overview by our experts.
 Please maintain a courteous and respectful tone in your American English responses./
 If you're unsure of an answer, respond with 'I am sorry.'/
 Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences."
-Feel free to use any tools available to look up for relevant information.
+Feel free to use any tools available to look up relevant information.
 Answer the question not more than two sentence.""")
 
-details= "Today's current date is "+ todays_date +" todays week day is "+day_of_the_week+"."
+details = "Today's current date is " + todays_date + " today's weekday is " + day_of_the_week + "."
 
-input_templete = template.format(details=details)
+input_template = template.format(details=details)
 
 system_message = SystemMessage(
-        content=input_templete)
+    content=input_template)
 
 prompt = OpenAIFunctionsAgent.create_prompt(
-        system_message=system_message,
-        extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
-    )
+    system_message=system_message,
+    extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
+)
 
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
-print("this code block running every time")
 
 if 'agent_executor' not in st.session_state:
-	agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
-	st.session_state.agent_executor = agent_executor
+    agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
+    st.session_state.agent_executor = agent_executor
 else:
-	agent_executor = st.session_state.agent_executor
+    agent_executor = st.session_state.agent_executor
 
 response_container = st.container()
 container = st.container()
-
-response_container = st.container()
-container = st.container()
-
-airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_key)
 
 def save_chat_to_airtable(user_name, user_input, output):
     try:
@@ -208,12 +176,24 @@ def save_chat_to_airtable(user_name, user_input, output):
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
 
-chat_history=[]
+chat_history = []
 
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
+
+# Create a sidebar for displaying chat history
+st.sidebar.title("Chat History")
+
+# Create a selectbox to choose a user and display their chat history
+selected_user = st.sidebar.selectbox("Select User", st.session_state.chat_histories.keys())
+if selected_user:
+    st.sidebar.text("Chat History:")
+    user_chat_history = st.session_state.chat_histories[selected_user]
+    for i, (query, answer) in enumerate(user_chat_history):
+        st.sidebar.text(f"{i + 1}. User: {query}")
+        st.sidebar.text(f"   Assistant: {answer}")
 
 with container:
     if st.session_state.user_name is None:
@@ -225,21 +205,24 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
+    # Create a button to start a new chat session and save the previous chat history to Airtable
+    if st.button("Refresh"):
+        # Save the current chat history to Airtable
+        previous_user = st.session_state.user_name
+        previous_chat_history = st.session_state.chat_history
+        for query, answer in previous_chat_history:
+            save_chat_to_airtable(previous_user, query, answer)
+        
+        # Reset the chat history
+        st.session_state.chat_history = []
+        user_input = ""  # Clear the input field
+
     if submit_button and user_input:
         output = conversational_chat(user_input)
         session_key = f"{st.session_state.user_name}_{todays_date}"
         if session_key not in st.session_state.chat_histories:
             st.session_state.chat_histories[session_key] = []
         st.session_state.chat_histories[session_key].append((user_input, output))
-        
-
-# Create a button to start a new chat session
-new_chat_button = st.button("Start New Chat")
-
-# When the new chat button is clicked, reset the chat history
-if new_chat_button:
-    st.session_state.chat_history = []
-    user_input = ""  # Clear the input field
 
 # Display Chat Histories
 with response_container:
@@ -249,9 +232,3 @@ with response_container:
     for i, (query, answer) in enumerate(chat_history):
         message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
         message(answer, key=f"{i}_answer", avatar_style="thumbs")
-   
-    if st.session_state.user_name:
-        try:
-            save_chat_to_airtable(st.session_state.user_name, user_input, output)
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
