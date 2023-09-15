@@ -119,6 +119,11 @@ if 'generated' not in st.session_state:
     st.session_state.generated = []
 if 'past' not in st.session_state:
     st.session_state.past = []
+
+# Add this code to initialize chat_histories
+if 'chat_histories' not in st.session_state:
+    st.session_state.chat_histories = {}
+
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
