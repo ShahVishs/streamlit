@@ -175,7 +175,6 @@ prompt = OpenAIFunctionsAgent.create_prompt(
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
 print("this code block running every time")
 
-
 if 'agent_executor' not in st.session_state:
 	agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
 	st.session_state.agent_executor = agent_executor
@@ -223,12 +222,31 @@ with container:
     
     if submit_button and user_input:
        output = conversational_chat(user_input)
-       # utc_now = datetime.utcnow()
-   
-       with response_container:
-           for i, (query, answer) in enumerate(st.session_state.chat_history):
-               message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-               message(answer, key=f"{i}_answer", avatar_style="thumbs")
+       session_key = f"{st.session_state.user_name}_{todays_date}"
+       if session_key not in st.session_state.chat_histories:
+           st.session_state.chat_histories[session_key] = []
+       st.session_state.chat_histories[session_key].append((user_input, output))
+       try:
+           save_chat_to_airtable(st.session_state.user_name, user_input, output)
+       except Exception as e:
+           st.error(f"An error occurred: {e}")
+
+# Create a button to start a new chat session
+new_chat_button = st.button("Start New Chat")
+
+# When the new chat button is clicked, reset the chat history
+if new_chat_button:
+    st.session_state.chat_history = []
+    user_input = ""  # Clear the input field
+
+# Display Chat Histories
+with response_container:
+    session_key = f"{st.session_state.user_name}_{todays_date}"
+    chat_history = st.session_state.chat_histories.get(session_key, [])
+       
+    for i, (query, answer) in enumerate(chat_history):
+        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+        message(answer, key=f"{i}_answer", avatar_style="thumbs")
    
            if st.session_state.user_name:
                try:
