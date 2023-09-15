@@ -256,9 +256,9 @@ with container:
             st.session_state.user_name = user_name
             
     if st.session_state.user_name is None:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
+        user_name = st.text_input("Your name:")
+        if user_name:
+            st.session_state.user_name = user_name
     
     if submit_button and user_input:
         output = conversational_chat(user_input)
