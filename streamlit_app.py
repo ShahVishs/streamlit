@@ -1,4 +1,5 @@
 import os
+import pickle
 from airtable import Airtable
 from langchain.chains.router import MultiRetrievalQAChain
 from langchain.llms import OpenAI
@@ -34,33 +35,64 @@ from langchain.agents import AgentExecutor
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 
-# datetime.datetime.now()
-datetime.now()
+# Initialize session state
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = None
+
+# Create a directory to store chat history files
+chat_history_dir = "chat_history_files"
+os.makedirs(chat_history_dir, exist_ok=True)
+
+# Get the first name of the chat for the filename
+def get_first_name(user_name):
+    first_name = user_name.split()[0] if user_name else "unknown"
+    return first_name
+
+# Function to save chat history to a file
+def save_chat_to_file(user_name, chat_history):
+    first_name = get_first_name(user_name)
+    filename = os.path.join(chat_history_dir, f"{first_name}_chat_history.pkl")
+    with open(filename, "wb") as file:
+        pickle.dump(chat_history, file)
+
+# Function to load chat history from a file
+def load_chat_from_file(user_name):
+    first_name = get_first_name(user_name)
+    filename = os.path.join(chat_history_dir, f"{first_name}_chat_history.pkl")
+    if os.path.exists(filename):
+        with open(filename, "rb") as file:
+            chat_history = pickle.load(file)
+        return chat_history
+    else:
+        return []
+
 # Get the current date in "%m/%d/%y" format
-# current_date = datetime.date.today().strftime("%m/%d/%y")
 current_date = datetime.today().strftime("%m/%d/%y")
+
 # Get the day of the week (0: Monday, 1: Tuesday, ..., 6: Sunday)
-# day_of_week = datetime.date.today().weekday()
 day_of_week = datetime.today().weekday()
+
 # Convert the day of the week to a string representation
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 current_day = days[day_of_week]
 
-# print("Current date:", current_date)
-# print("Current day:", current_day)
 todays_date = current_date
 day_of_the_week = current_day
 
 business_details_text = [
-    "working days: all Days except sunday",
+    "working days: all Days except Sunday",
     "working hours: 9 am to 7 pm",
     "Phone: (555) 123-4567",
     "Address: 567 Oak Avenue, Anytown, CA 98765, Email: jessica.smith@example.com",
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
+
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 
-file_1 = r'dealer_1_inventry.csv'
+file_1 = r'dealer_1_inventory.csv'
 
 loader = CSVLoader(file_path=file_1)
 docs_1 = loader.load()
@@ -93,12 +125,12 @@ AIRTABLE_TABLE_NAME = "Question_Answer_Data"
 airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_key)
 
 # Streamlit UI setup
-st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventory, Business details, Financing and Discounts and Offers related questions. [Here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is an inventory dataset to explore and play with the data. The appointment dataset is not available in this example.")
+st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventory, Business details, Financing and Discounts and Offers related questions. [Here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventory.csv) is an inventory dataset to explore and play with the data. The appointment dataset is not available in this example.")
+
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-if 'chat_histories' not in st.session_state:
-    st.session_state.chat_histories = {}
+
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
@@ -106,38 +138,38 @@ llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
 langchain.debug = True
 memory_key = "history"
 memory = AgentTokenBufferMemory(memory_key=memory_key, llm=llm)
+
 template = (
     """You're the Business Development Manager at our car dealership./
-When responding to inquiries, please adhere to the following guidelines:
-Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred/
-make, model, new or used car, and trade-in, kindly engage by asking for these specifics./
-Specific Car Details: When addressing questions about a particular car, limit the information provided/
-to make, year, model, and trim. For example, if asked about 
-'Do you have Jeep Cherokee Limited 4x4'
-Best answer should be 'Yes we have,
-Jeep Cherokee Limited 4x4:
-Year: 2022
-Model :
-Make :
-Trim:
-scheduling Appointments: If the customer's inquiry lacks specific details such as their preferred/
-day, date or time kindly engage by asking for these specifics. {details} Use these details that are today's date and day /
-to find the appointment date from the user's input and check for appointment availability for that specific date and time. 
-If the appointment schedule is not available, provide this 
-link: www.dummy_calenderlink.com to schedule an appointment by the user himself. 
-If appointment schedules are not available, you should send this link: www.dummy_calendarlink.com to the 
-customer to schedule an appointment on your own.
+    When responding to inquiries, please adhere to the following guidelines:
+    Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred/
+    make, model, new or used car, and trade-in, kindly engage by asking for these specifics./
+    Specific Car Details: When addressing questions about a particular car, limit the information provided/
+    to make, year, model, and trim. For example, if asked about 'Do you have Jeep Cherokee Limited 4x4'
+    Best answer should be 'Yes, we have,
+    Jeep Cherokee Limited 4x4:
+    Year: 2022
+    Model :
+    Make :
+    Trim:
+    scheduling Appointments: If the customer's inquiry lacks specific details such as their preferred/
+    day, date, or time, kindly engage by asking for these specifics. {details} Use these details that are today's date and day /
+    to find the appointment date from the user's input and check for appointment availability for that specific date and time. 
+    If the appointment schedule is not available, provide this 
+    link: www.dummy_calenderlink.com to schedule an appointment by the user himself. 
+    If appointment schedules are not available, you should send this link: www.dummy_calendarlink.com to the 
+    customer to schedule an appointment on your own.
 
-Encourage Dealership Visit: Our goal is to encourage customers to visit the dealership for test drives or/
-receive product briefings from our team. After providing essential information on the car's make, model,/
-color, and basic features, kindly invite the customer to schedule an appointment for a test drive or visit us/
-for a comprehensive product overview by our experts.
+    Encourage Dealership Visit: Our goal is to encourage customers to visit the dealership for test drives or/
+    receive product briefings from our team. After providing essential information on the car's make, model,/
+    color, and basic features, kindly invite the customer to schedule an appointment for a test drive or visit us/
+    for a comprehensive product overview by our experts.
 
-Please maintain a courteous and respectful tone in your American English responses./
-If you're unsure of an answer, respond with 'I am sorry.'/
-Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences."
-Feel free to use any tools available to look up relevant information.
-Answer the question not more than two sentence.""")
+    Please maintain a courteous and respectful tone in your American English responses./
+    If you're unsure of an answer, respond with 'I am sorry.'/
+    Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences."
+    Feel free to use any tools available to look up relevant information.
+    Answer the question not more than two sentences.""")
 
 details = "Today's current date is " + todays_date + " today's weekday is " + day_of_the_week + "."
 
@@ -162,6 +194,7 @@ else:
 response_container = st.container()
 container = st.container()
 
+# Function to save chat history to Airtable
 def save_chat_to_airtable(user_name, user_input, output):
     try:
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -176,11 +209,13 @@ def save_chat_to_airtable(user_name, user_input, output):
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
 
-chat_history = []
+# Function to add a chat entry to the chat history
+def add_chat_to_history(user_input, output):
+    st.session_state.chat_history.append((user_input, output))
 
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
-    st.session_state.chat_history.append((user_input, result["output"]))
+    add_chat_to_history(user_input, result["output"])
     return result["output"]
 
 # Create a sidebar for displaying chat history
@@ -205,13 +240,14 @@ with container:
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
     
-    # Create a button to start a new chat session and save the previous chat history to Airtable
+    # Create a button to start a new chat session and save the previous chat history to a file and Airtable
     if st.button("Refresh"):
+        # Save the current chat history to a file
+        save_chat_to_file(st.session_state.user_name, st.session_state.chat_history)
+        
         # Save the current chat history to Airtable
-        previous_user = st.session_state.user_name
-        previous_chat_history = st.session_state.chat_history
-        for query, answer in previous_chat_history:
-            save_chat_to_airtable(previous_user, query, answer)
+        for user_input, output in st.session_state.chat_history:
+            save_chat_to_airtable(st.session_state.user_name, user_input, output)
         
         # Reset the chat history
         st.session_state.chat_history = []
@@ -219,10 +255,6 @@ with container:
 
     if submit_button and user_input:
         output = conversational_chat(user_input)
-        session_key = f"{st.session_state.user_name}_{todays_date}"
-        if session_key not in st.session_state.chat_histories:
-            st.session_state.chat_histories[session_key] = []
-        st.session_state.chat_histories[session_key].append((user_input, output))
 
 # Display Chat Histories
 with response_container:
@@ -232,3 +264,4 @@ with response_container:
     for i, (query, answer) in enumerate(chat_history):
         message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
         message(answer, key=f"{i}_answer", avatar_style="thumbs")
+
