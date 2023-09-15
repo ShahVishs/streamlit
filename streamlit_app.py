@@ -30,7 +30,7 @@ from langchain.agents.openai_functions_agent.base import OpenAIFunctionsAgent
 from langchain.schema.messages import SystemMessage
 from langchain.prompts import MessagesPlaceholder
 from langchain.agents import AgentExecutor
-
+import json
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 
@@ -59,14 +59,18 @@ business_details_text = [
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
-# Function to save chat session to a file
 def save_chat_session(session_data):
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
     session_filename = f"chat_session_{current_time}.json"
     
+    # Convert session_data to a dictionary
+    session_dict = {
+        'user_name': session_data['user_name'],
+        'chat_history': session_data['chat_history']
+    }
+    
     with open(session_filename, "w") as session_file:
-        json.dump(session_data, session_file)
-
+        json.dump(session_dict, session_file)
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = []
