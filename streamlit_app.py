@@ -53,32 +53,12 @@ business_details_text = [
 
 # Create a retriever for business details
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
+file_1 = r'dealer_1_inventry.csv'
 
-# Define the file path to your CSV file
-file_1 = r'dealer_1_inventory.csv'
-
-# Check if the CSV file exists
-if not os.path.exists(file_1):
-    st.error(f"CSV file '{file_1}' not found.")
-else:
-    try:
-        # Attempt to load the CSV file
-        loader = CSVLoader(file_path=file_1)
-        docs_1 = loader.load()
-        
-        # Check if the CSV data was loaded successfully
-        if docs_1:
-            st.success("CSV file loaded successfully.")
-        else:
-            st.warning("CSV file is empty.")
-    except Exception as e:
-        st.error(f"An error occurred while loading the CSV file: {e}")
+loader = CSVLoader(file_path=file_1)
+docs_1 = loader.load()
 embeddings = OpenAIEmbeddings()
-
-# Create a vector store for car inventory data
 vectorstore_1 = FAISS.from_documents(docs_1, embeddings)
-
-# Create a retriever for car inventory data
 retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})
 
 # Define the tools for retrieval
@@ -108,7 +88,10 @@ st.info("We're developing cutting-edge conversational AI solutions tailored for 
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-
+if 'generated' not in st.session_state:
+    st.session_state.generated = []
+if 'past' not in st.session_state:
+    st.session_state.past = []
 # Initialize chat histories
 if 'chat_histories' not in st.session_state:
     st.session_state.chat_histories = {}
@@ -125,14 +108,37 @@ memory = AgentTokenBufferMemory(memory_key=memory_key, llm=llm)
 
 # Define the template for system message
 template = (
-    "You're the Business Development Manager at our car dealership. When responding to inquiries, please adhere to the following guidelines:\n\n"
-    "Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred make, model, new or used car, and trade-in, kindly engage by asking for these specifics.\n\n"
-    "Specific Car Details: When addressing questions about a particular car, limit the information provided to make, year, model, and trim. For example, if asked about 'Do you have Jeep Cherokee Limited 4x4', the best answer should be 'Yes, we have Jeep Cherokee Limited 4x4:\nYear: 2022\nModel:\nMake:\nTrim:\n'\n\n"
-    "Scheduling Appointments: If the customer's inquiry lacks specific details such as their preferred day, date, or time, kindly engage by asking for these specifics. {details} Use these details to find the appointment date from the user's input and check for appointment availability for that specific date and time. If the appointment schedule is not available, provide this link: [www.dummy_calenderlink.com](www.dummy_calenderlink.com) to schedule an appointment by the user themselves. If appointment schedules are not available, you should send this link: [www.dummy_calendarlink.com](www.dummy_calendarlink.com) to the customer to schedule an appointment on their own.\n\n"
-    "Encourage Dealership Visit: Our goal is to encourage customers to visit the dealership for test drives or receive product briefings from our team. After providing essential information on the car's make, model, color, and basic features, kindly invite the customer to schedule an appointment for a test drive or visit us for a comprehensive product overview by our experts.\n\n"
-    "Please maintain a courteous and respectful tone in your American English responses. If you're unsure of an answer, respond with 'I am sorry.' Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences.\n\n"
-    "Feel free to use any tools available to look up relevant information.\n\n"
-    "Answer the question in not more than two sentences."
+"""You're the Business Development Manager at our car dealership./
+When responding to inquiries, please adhere to the following guidelines:
+Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred/
+make, model, new or used car, and trade-in, kindly engage by asking for these specifics./
+Specific Car Details: When addressing questions about a particular car, limit the information provided/
+to make, year, model, and trim. For example, if asked about 
+'Do you have Jeep Cherokee Limited 4x4'
+Best answer should be 'Yes we have,
+Jeep Cherokee Limited 4x4:
+Year: 2022
+Model :
+Make :
+Trim:
+scheduling Appointments: If the customer's inquiry lacks specific details such as their preferred/
+day, date or time kindly engage by asking for these specifics. {details} Use these details that is todays date and day /
+to find the appointment date from the users input and check for appointment availabity for that specific date and time. 
+If the appointment schedule is not available provide this 
+link: www.dummy_calenderlink.com to schedule appointment by the user himself. 
+If appointment schedules are not available, you should send this link: www.dummy_calendarlink.com to the 
+costumer to schedule an appointment on your own.
+
+Encourage Dealership Visit: Our goal is to encourage customers to visit the dealership for test drives or/
+receive product briefings from our team. After providing essential information on the car's make, model,/
+color, and basic features, kindly invite the customer to schedule an appointment for a test drive or visit us/
+for a comprehensive product overview by our experts.
+
+Please maintain a courteous and respectful tone in your American English responses./
+If you're unsure of an answer, respond with 'I am sorry.'/
+Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences."
+Feel free to use any tools available to look up for relevant information.
+Answer the question not more than two sentence."""
 )
 
 # Create the details string
@@ -152,7 +158,14 @@ prompt = OpenAIFunctionsAgent.create_prompt(
 
 # Create an agent with the language model, tools, and prompt
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
+if 'agent_executor' not in st.session_state:
+	agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
+	st.session_state.agent_executor = agent_executor
+else:
+	agent_executor = st.session_state.agent_executor
 
+response_container = st.container()
+container = st.container()
 # Define a function to save chat history to Airtable
 def save_chat_to_airtable(user_name, user_input, output):
     try:
@@ -167,15 +180,12 @@ def save_chat_to_airtable(user_name, user_input, output):
         )
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
-
+chat_history=[]
 # Define a function for conversational chat
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
-
-# Create a container for user input and chat history
-container = st.container()
 
 # If the user name is not set, prompt the user to enter their name
 with container:
@@ -190,55 +200,27 @@ with container:
         submit_button = st.form_submit_button(label='Send')
 
     # If the submit button is clicked and user input is provided
-    if submit_button and user_input:
-        # Get the assistant's response
-        response = conversational_chat(user_input)
-        session_key = f"{st.session_state.user_name}_{current_date}"
+    with container:
+        if st.session_state.user_name is None:
+            user_name = st.text_input("Your name:")
+            if user_name:
+                st.session_state.user_name = user_name
+        with st.form(key='my_form', clear_on_submit=True):
+            user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
+            submit_button = st.form_submit_button(label='Send')
+        if submit_button and user_input:
+       output = conversational_chat(user_input)
+       # utc_now = datetime.utcnow()
+   
+       with response_container:
+           for i, (query, answer) in enumerate(st.session_state.chat_history):
+               message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+               message(answer, key=f"{i}_answer", avatar_style="thumbs")
+   
+           if st.session_state.user_name:
+               try:
+                   save_chat_to_airtable(st.session_state.user_name, user_input, output)
+               except Exception as e:
+                   st.error(f"An error occurred: {e}")
 
-        # Create a session chat history if it doesn't exist
-        if session_key not in st.session_state.chat_histories:
-            st.session_state.chat_histories[session_key] = []
 
-        # Append the user input and response to the session chat history
-        st.session_state.chat_histories[session_key].append((user_input, response))
-
-        # Save the chat to Airtable
-        try:
-            save_chat_to_airtable(st.session_state.user_name, user_input, response)
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-
-# Create a button to start a new chat session
-new_chat_button = st.button("Start New Chat")
-
-# When the new chat button is clicked, reset the chat history
-if new_chat_button:
-    st.session_state.chat_history = []
-    user_input = ""  # Clear the input field
-
-# Display Chat Histories
-sidebar = st.sidebar
-session_key = f"{st.session_state.user_name}_{current_date}"
-
-# If a session chat history exists, display it in the sidebar
-if session_key in st.session_state.chat_histories:
-    sidebar.header("Session Chat History")
-    chat_history = st.session_state.chat_histories[session_key]
-    
-    for i, (query, answer) in enumerate(chat_history):
-        sidebar.write(f"**User:** {query}")
-        sidebar.write(f"**Assistant:** {answer}")
-
-# Create a button to clear the current chat history
-refresh_button = st.sidebar.button("Refresh Chat History")
-
-# When the refresh button is clicked, clear the current chat history
-if refresh_button:
-    st.session_state.chat_histories[session_key] = []
-
-# Display User Chat History
-response_container = st.container()
-with response_container:
-    for i, (query, answer) in enumerate(st.session_state.chat_history):
-        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-        message(answer, key=f"{i}_answer", avatar_style="thumbs")
