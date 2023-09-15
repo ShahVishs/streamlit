@@ -156,12 +156,15 @@ AIRTABLE_TABLE_NAME = "Question_Answer_Data"
 
 st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data. Appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv)")
 
+# Initialize session state and 'user_name'
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = {}
 if 'generated' not in st.session_state:
     st.session_state.generated = []
 if 'past' not in st.session_state:
     st.session_state.past = []
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = None
 
 llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature = 0)
 langchain.debug=True
@@ -252,9 +255,10 @@ with container:
         if user_name:
             st.session_state.user_name = user_name
             
-    with st.form(key='my_form', clear_on_submit=True):
-        user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-        submit_button = st.form_submit_button(label='Send')
+    if st.session_state.user_name is None:
+    user_name = st.text_input("Your name:")
+    if user_name:
+        st.session_state.user_name = user_name
     
     if submit_button and user_input:
         output = conversational_chat(user_input)
