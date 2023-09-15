@@ -104,6 +104,12 @@ if 'chat_history' not in st.session_state:
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
+# Check if the user's name is not set, then ask for the name
+if st.session_state.user_name is None:
+    user_name = st.text_input("Your name:")
+    if user_name:
+        st.session_state.user_name = user_name
+
 # Create a Streamlit button for starting a new session
 if st.button("Refresh Session"):
     # Save the current session and start a new one
@@ -120,14 +126,12 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
-# Display a list of session names
-selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
-
-# Display the selected session's chat history in the main area
-st.title("Chat Session History")
+# Display a list of session names along with session IDs
+session_list = [f"Session {i + 1} ({past_sessions[i]['session_id']})" for i in range(len(past_sessions))]
+selected_session = st.sidebar.selectbox("Select a session:", session_list)
 
 if selected_session:
-    session_index = int(selected_session.split()[-1]) - 1
+    session_index = int(selected_session.split()[-1].split("(")[0].strip()) - 1
     selected_session_data = past_sessions[session_index]
     
     st.header(selected_session)
@@ -135,12 +139,6 @@ if selected_session:
     for question, answer in selected_session_data["chat_history"]:
         st.write(f"**User:** {question}")
         st.write(f"**AI:** {answer}")
-
-# Check if the user's name is not set, then ask for the name
-if st.session_state.user_name is None:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
