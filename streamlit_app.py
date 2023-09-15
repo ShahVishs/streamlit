@@ -104,11 +104,8 @@ if 'chat_history' not in st.session_state:
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-# Determine if this is a completely new session or returning to a previous one
-completely_new_session = st.button("Start New Session")
-
-# If it's a completely new session or there is no previous session, ask for the user's name
-if completely_new_session or not past_sessions:
+# Check if the user's name is not set, then ask for the name
+if st.session_state.user_name is None:
     user_name = st.text_input("Your name:")
     if user_name:
         st.session_state.user_name = user_name
