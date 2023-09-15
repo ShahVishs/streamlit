@@ -106,7 +106,9 @@ st.sidebar.header("Previous Sessions")
 # Display a list of session names
 selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
 
-# Display the selected session's chat history
+# Display the selected session's chat history in the main area
+st.title("Chat Session History")
+
 if selected_session:
     session_index = int(selected_session.split()[-1]) - 1
     selected_session_data = past_sessions[session_index]
