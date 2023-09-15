@@ -104,11 +104,8 @@ if 'chat_history' not in st.session_state:
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-# Determine if this is a completely new session or returning to a previous one
-completely_new_session = st.button("Start New Session")
-
-# If it's a completely new session or there is no previous session, ask for the user's name
-if completely_new_session or not past_sessions:
+# Check if the user's name is not set, then ask for the name
+if st.session_state.user_name is None:
     user_name = st.text_input("Your name:")
     if user_name:
         st.session_state.user_name = user_name
@@ -144,7 +141,6 @@ if selected_session:
     for question, answer in selected_session_data["chat_history"]:
         st.write(f"**User:** {question}")
         st.write(f"**AI:** {answer}")
-
 
 file_1 = r'dealer_1_inventry.csv'
 
@@ -301,10 +297,6 @@ with container:
             
     with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-        if user_input:
-            st.write(f"**User:** {user_input}")
-            # Add the user's question to the current session's chat history
-            st.session_state.chat_history.append((user_input, "AI's response here."))
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
