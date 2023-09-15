@@ -54,12 +54,25 @@ business_details_text = [
 # Create a retriever for business details
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 
-# Define the file path for car inventory data
+# Define the file path to your CSV file
 file_1 = r'dealer_1_inventory.csv'
 
-# Create a CSV loader for car inventory data
-loader = CSVLoader(file_path=file_1)
-docs_1 = loader.load()
+# Check if the CSV file exists
+if not os.path.exists(file_1):
+    st.error(f"CSV file '{file_1}' not found.")
+else:
+    try:
+        # Attempt to load the CSV file
+        loader = CSVLoader(file_path=file_1)
+        docs_1 = loader.load()
+        
+        # Check if the CSV data was loaded successfully
+        if docs_1:
+            st.success("CSV file loaded successfully.")
+        else:
+            st.warning("CSV file is empty.")
+    except Exception as e:
+        st.error(f"An error occurred while loading the CSV file: {e}")
 embeddings = OpenAIEmbeddings()
 
 # Create a vector store for car inventory data
