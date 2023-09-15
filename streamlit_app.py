@@ -209,8 +209,8 @@ with container:
             user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
             submit_button = st.form_submit_button(label='Send')
         if submit_button and user_input:
-       output = conversational_chat(user_input)
-       # utc_now = datetime.utcnow()
+	       output = conversational_chat(user_input)
+	       # utc_now = datetime.utcnow()
    
        with response_container:
            for i, (query, answer) in enumerate(st.session_state.chat_history):
