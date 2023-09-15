@@ -100,12 +100,11 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Create or load previous sessions
-if 'chat_sessions' not in st.session_state:
-    st.session_state.chat_sessions = load_previous_sessions()
-
 # Create a Streamlit sidebar to display previous sessions
 st.sidebar.header("Previous Sessions")
+
+# Load previous chat sessions
+past_sessions = load_previous_sessions()
 
 # Display a list of session names
 selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
