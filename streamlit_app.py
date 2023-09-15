@@ -231,10 +231,7 @@ with container:
         if session_key not in st.session_state.chat_histories:
             st.session_state.chat_histories[session_key] = []
         st.session_state.chat_histories[session_key].append((user_input, output))
-        try:
-            save_chat_to_airtable(st.session_state.user_name, user_input, output)
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        
 
 # Create a button to start a new chat session
 new_chat_button = st.button("Start New Chat")
