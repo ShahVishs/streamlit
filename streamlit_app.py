@@ -62,6 +62,10 @@ retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_ret
 # Define a list to store past chat sessions
 past_sessions = []
 
+# Create the "chat_sessions" folder if it doesn't exist
+if not os.path.exists("chat_sessions"):
+    os.makedirs("chat_sessions")
+
 # Function to save the current chat session
 def save_chat_session(session_data):
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
