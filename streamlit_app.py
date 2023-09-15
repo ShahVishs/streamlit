@@ -107,10 +107,11 @@ if st.button("Start New Session"):
     st.session_state.current_session_index = -1  # Reset the session index to start a new session
 
 # Display a list of session names
-selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
+session_names = [f"Session {i + 1}" for i in range(len(past_sessions))]
+selected_session = st.sidebar.selectbox("Select a session:", session_names)
 
 # Determine the selected session index
-session_index = int(selected_session.split()[-1]) - 1 if selected_session else None
+session_index = session_names.index(selected_session) if selected_session else None
 
 # Initialize or reset chat history based on the selected session
 if session_index is not None:
