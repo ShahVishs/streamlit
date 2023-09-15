@@ -31,60 +31,95 @@ from langchain.schema.messages import SystemMessage
 from langchain.prompts import MessagesPlaceholder
 from langchain.agents import AgentExecutor
 
-# Set your OpenAI API key
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-
-# Display an image or logo
 st.image("socialai.jpg")
 
-# Get the current date and day of the week
+# datetime.datetime.now()
+datetime.now()
+# Get the current date in "%m/%d/%y" format
+# current_date = datetime.date.today().strftime("%m/%d/%y")
 current_date = datetime.today().strftime("%m/%d/%y")
-day_of_week = datetime.today().strftime("%A")
+# Get the day of the week (0: Monday, 1: Tuesday, ..., 6: Sunday)
+# day_of_week = datetime.date.today().weekday()
+day_of_week = datetime.today().weekday()
+# Convert the day of the week to a string representation
+days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+current_day = days[day_of_week]
 
-# Define business details for retrieval
+# print("Current date:", current_date)
+# print("Current day:", current_day)
+todays_date = current_date
+day_of_the_week = current_day
+
 business_details_text = [
-    "Working days: All days except Sunday",
-    "Working hours: 9 am to 7 pm",
-    "Phone: (555) 123-4567",
-    "Address: 567 Oak Avenue, Anytown, CA 98765",
-    "Email: jessica.smith@example.com",
-    "Dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/"
+    "working days: all Days except sunday",
+    "working hours: 9 am to 7 pm"
+    "Phone: (555) 123-4567"
+    "Address: 567 Oak Avenue, Anytown, CA 98765, Email: jessica.smith@example.com",
+    "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
-
-# Create a retriever for business details
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
+# Create a Streamlit button for starting a new session
+if st.button("Refresh Session"):
+    # Clear session state variables to start a new session
+    st.session_state.chat_history = []
+    st.session_state.generated = []
+    st.session_state.past = []
+    st.session_state.user_name = None
+    st.session_state.agent_executor = None
+
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
 docs_1 = loader.load()
 embeddings = OpenAIEmbeddings()
 vectorstore_1 = FAISS.from_documents(docs_1, embeddings)
-retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})
+retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
 
-# Define the tools for retrieval
+# file_2 = r'appointment.csv'
+# loader = CSVLoader(file_path=file_2)
+# docs_2 = loader.load()
+# embeddings = OpenAIEmbeddings()
+# vectorstore_2 = FAISS.from_documents(docs_2, embeddings)
+
+# retriever_2 = vectorstore_2.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
+
+
+# Create the first tool
 tool1 = create_retriever_tool(
     retriever_1, 
      "search_car_dealership_inventory",
-     "Searches and returns documents regarding the car inventory. Input should be a single string."
+     "Searches and returns documents regarding the car inventory and Input should be a single string strictly."
 )
 
+# # Create the second tool
+# tool2 = create_retriever_tool(
+#     retriever_2, 
+#     "search_appointment",
+# #     "Searches and returns documents related to the appointments scheduling."
+#     "Use to schedule an appointment for a given date and time. The input to this tool should be a comma separated\
+#     list of 2 strings: date and time in format: mm/dd/yy, hh,\
+#     convert date and time to these formats. For example, `12/31/23, 10:00` \
+#     would be the input for Dec 31'st 2023 at 10am."
+# )
+
+# Create the third tool
 tool3 = create_retriever_tool(
     retriever_3, 
     "search_business_details",
-    "Searches and returns documents related to business working days, hours, location, and address details."
+    "Searches and returns documents related to business working days and hours, location and address details."
 )
 
+# Append all tools to the tools list
 tools = [tool1, tool3]
 
-# Set up Airtable integration
+# airtable
 airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
 os.environ["AIRTABLE_API_KEY"] = airtable_api_key
 AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"  
 AIRTABLE_TABLE_NAME = "Question_Answer_Data" 
-
 # Streamlit UI setup
-st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about inventory, business details, financing, discounts, and offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventory.csv). The appointment dataset is [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
-
+st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data. Appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv)")
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
@@ -92,22 +127,15 @@ if 'generated' not in st.session_state:
     st.session_state.generated = []
 if 'past' not in st.session_state:
     st.session_state.past = []
-# Initialize chat histories
-if 'chat_histories' not in st.session_state:
-    st.session_state.chat_histories = {}
-
 # Initialize user name in session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-# Initialize Language Model
-llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
-langchain.debug = True
+llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature = 0)
+langchain.debug=True
 memory_key = "history"
 memory = AgentTokenBufferMemory(memory_key=memory_key, llm=llm)
-
-# Define the template for system message
-template = (
+template=(
 """You're the Business Development Manager at our car dealership./
 When responding to inquiries, please adhere to the following guidelines:
 Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred/
@@ -138,26 +166,24 @@ Please maintain a courteous and respectful tone in your American English respons
 If you're unsure of an answer, respond with 'I am sorry.'/
 Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences."
 Feel free to use any tools available to look up for relevant information.
-Answer the question not more than two sentence."""
-)
+Answer the question not more than two sentence.""")
 
-# Create the details string
-details = f"Today's current date is {current_date} and today's week day is {day_of_week}."
+details= "Today's current date is "+ todays_date +" todays week day is "+day_of_the_week+"."
 
-# Create the input template for the assistant
-input_template = template.format(details=details)
+input_templete = template.format(details=details)
 
-# Create a system message with the input template
-system_message = SystemMessage(content=input_template)
+system_message = SystemMessage(
+        content=input_templete)
 
-# Create a prompt with the system message
 prompt = OpenAIFunctionsAgent.create_prompt(
-    system_message=system_message,
-    extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
-)
+        system_message=system_message,
+        extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
+    )
 
-# Create an agent with the language model, tools, and prompt
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
+print("this code block running every time")
+
+
 if 'agent_executor' not in st.session_state:
 	agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
 	st.session_state.agent_executor = agent_executor
@@ -166,7 +192,12 @@ else:
 
 response_container = st.container()
 container = st.container()
-# Define a function to save chat history to Airtable
+
+response_container = st.container()
+container = st.container()
+
+airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_key)
+
 def save_chat_to_airtable(user_name, user_input, output):
     try:
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -180,37 +211,27 @@ def save_chat_to_airtable(user_name, user_input, output):
         )
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
+
 chat_history=[]
-# Define a function for conversational chat
+
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-# If the user name is not set, prompt the user to enter their name
 with container:
     if st.session_state.user_name is None:
         user_name = st.text_input("Your name:")
         if user_name:
             st.session_state.user_name = user_name
-
-    # Create a form for user input
+            
     with st.form(key='my_form', clear_on_submit=True):
-        user_input = st.text_input("Query:", placeholder="Type your question here (:")
+        user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         submit_button = st.form_submit_button(label='Send')
-
-    # If the submit button is clicked and user input is provided
-    with container:
-        if st.session_state.user_name is None:
-            user_name = st.text_input("Your name:")
-            if user_name:
-                st.session_state.user_name = user_name
-        with st.form(key='my_form', clear_on_submit=True):
-            user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-            submit_button = st.form_submit_button(label='Send')
-        if submit_button and user_input:
-	       output = conversational_chat(user_input)
-	       # utc_now = datetime.utcnow()
+    
+    if submit_button and user_input:
+       output = conversational_chat(user_input)
+       # utc_now = datetime.utcnow()
    
        with response_container:
            for i, (query, answer) in enumerate(st.session_state.chat_history):
@@ -222,5 +243,3 @@ with container:
                    save_chat_to_airtable(st.session_state.user_name, user_input, output)
                except Exception as e:
                    st.error(f"An error occurred: {e}")
-
-
