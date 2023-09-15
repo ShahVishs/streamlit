@@ -69,18 +69,19 @@ if st.button("Refresh Session"):
     st.session_state.agent_executor = None
 # Create a sidebar to display previous sessions and their chat history
 st.sidebar.header("Previous Sessions")
-for session_id, session_data in enumerate(st.session_state.past):
-    session_name = session_data['user_name']
-    chat_history = session_data['chat_history']
-    
-    st.sidebar.markdown(f"**Session {session_id + 1}:**")
-    st.sidebar.markdown(f"- **User:** {session_name}")
-    st.sidebar.markdown(f"**Chat History:**")
-    
-    # Display the complete chat history for this session
-    for question, answer in chat_history:
-        st.sidebar.markdown(f"- *User:* {question}")
-        st.sidebar.markdown(f"- *AI:* {answer}")
+if 'past' in st.session_state:
+    for session_id, session_data in enumerate(st.session_state.past):
+        session_name = session_data['user_name']
+        chat_history = session_data['chat_history']
+
+        st.sidebar.markdown(f"**Session {session_id + 1}:**")
+        st.sidebar.markdown(f"- **User:** {session_name}")
+        st.sidebar.markdown(f"**Chat History:**")
+
+        # Display the complete chat history for this session
+        for question, answer in chat_history:
+            st.sidebar.markdown(f"- *User:* {question}")
+            st.sidebar.markdown(f"- *AI:* {answer}")
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
