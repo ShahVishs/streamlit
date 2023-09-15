@@ -72,40 +72,42 @@ def load_previous_sessions():
             previous_sessions.append(session_data)
     return previous_sessions
 
+# Load previous chat sessions
 past_sessions = load_previous_sessions()
 
+# Initialize session state
 if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = {}
+    st.session_state.chat_history = []
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 if 'session_id' not in st.session_state:
     st.session_state.session_id = None
 
-def start_new_session():
-    session_id = str(datetime.now())
-    st.session_state.session_id = session_id
-    st.session_state.chat_history[session_id] = []
-
+# Determine if this is a completely new session or returning to a previous one
 completely_new_session = st.button("Start New Session")
 
-if completely_new_session or not st.session_state.chat_history:
-    start_new_session()
+# If it's a completely new session or there is no previous session, ask for the user's name
+if completely_new_session or not past_sessions:
     user_name = st.text_input("Your name:")
     if user_name:
         st.session_state.user_name = user_name
+        # Assign a unique session ID for this session
+        st.session_state.session_id = str(datetime.now())
 
-with st.form(key='my_form', clear_on_submit=True):
-    user_input = st.text_input("Query:", placeholder="Type your question here (:")
-    if user_input:
-        st.write(f"**User:** {user_input}")
-        if st.session_state.session_id:
-            st.session_state.chat_history[st.session_state.session_id].append((user_input, "AI's response here."))
-    submit_button = st.form_submit_button(label='Send')
+# Create a Streamlit sidebar to display previous sessions
+st.sidebar.header("Previous Sessions")
 
-if st.session_state.session_id:
-    st.header(f"Session {st.session_state.session_id}")
-    session_history = st.session_state.chat_history.get(st.session_state.session_id, [])
-    for question, answer in session_history:
+# Display a list of session names
+selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
+
+# Display the selected session's chat history
+if selected_session:
+    session_index = int(selected_session.split()[-1]) - 1
+    selected_session_data = past_sessions[session_index]
+    
+    st.header(selected_session)
+    
+    for question, answer in selected_session_data["chat_history"]:
         st.markdown(f"**User:** {question}")
         st.markdown(f"**AI:** {answer}")
 
