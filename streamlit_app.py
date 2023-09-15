@@ -181,27 +181,25 @@ Make every effort to assist the customer promptly while keeping responses concis
 Feel free to use any tools available to look up for relevant information.
 Answer the question not more than two sentence.""")
 
-details= "Today's current date is "+ todays_date +" todays week day is "+day_of_the_week+"."
+details = "Today's current date is " + todays_date + " and today's week day is " + day_of_the_week + "."
 
-input_templete = template.format(details=details)
+input_template = template.format(details=details)
 
 system_message = SystemMessage(
-        content=input_templete)
+    content=input_template)
 
 prompt = OpenAIFunctionsAgent.create_prompt(
-        system_message=system_message,
-        extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
-    )
+    system_message=system_message,
+    extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
+)
 
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
-print("this code block running every time")
-
 
 if 'agent_executor' not in st.session_state:
-	agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
-	st.session_state.agent_executor = agent_executor
+    agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, return_intermediate_steps=True)
+    st.session_state.agent_executor = agent_executor
 else:
-	agent_executor = st.session_state.agent_executor
+    agent_executor = st.session_state.agent_executor
 
 response_container = st.container()
 container = st.container()
@@ -225,8 +223,6 @@ def save_chat_to_airtable(user_name, user_input, output):
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
 
-chat_history=[]
-
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
     st.session_state.chat_history.append((user_input, result["output"]))
@@ -243,24 +239,24 @@ with container:
         submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
-	    output = conversational_chat(user_input)
-	    st.session_state.chat_history.append((user_input, output))
+        output = conversational_chat(user_input)
+        st.session_state.chat_history.append((user_input, output))
 
-	# Save the current session data to past sessions
+    # Save the current session data to past sessions
     if st.session_state.user_name and st.session_state.chat_history:
-	    current_session_data = {
-		'user_name': st.session_state.user_name,
-		'chat_history': st.session_state.chat_history
-	    }
-	    st.session_state.past.append(current_session_data)
-   
-       with response_container:
-           for i, (query, answer) in enumerate(st.session_state.chat_history):
-               message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-               message(answer, key=f"{i}_answer", avatar_style="thumbs")
-   
-           if st.session_state.user_name:
-               try:
-                   save_chat_to_airtable(st.session_state.user_name, user_input, output)
-               except Exception as e:
-                   st.error(f"An error occurred: {e}")
+        current_session_data = {
+            'user_name': st.session_state.user_name,
+            'chat_history': st.session_state.chat_history
+        }
+        st.session_state.past.append(current_session_data)
+
+with response_container:
+    for i, (query, answer) in enumerate(st.session_state.chat_history):
+        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
+        message(answer, key=f"{i}_answer", avatar_style="thumbs")
+
+    if st.session_state.user_name:
+        try:
+            save_chat_to_airtable(st.session_state.user_name, user_input, output)
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
