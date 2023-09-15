@@ -67,7 +67,20 @@ if st.button("Refresh Session"):
     st.session_state.past = []
     st.session_state.user_name = None
     st.session_state.agent_executor = None
-
+# Create a sidebar to display previous sessions and their chat history
+st.sidebar.header("Previous Sessions")
+for session_id, session_data in enumerate(st.session_state.past):
+    session_name = session_data['user_name']
+    chat_history = session_data['chat_history']
+    
+    st.sidebar.markdown(f"**Session {session_id + 1}:**")
+    st.sidebar.markdown(f"- **User:** {session_name}")
+    st.sidebar.markdown(f"**Chat History:**")
+    
+    # Display the complete chat history for this session
+    for question, answer in chat_history:
+        st.sidebar.markdown(f"- *User:* {question}")
+        st.sidebar.markdown(f"- *AI:* {answer}")
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
@@ -243,3 +256,10 @@ with container:
                    save_chat_to_airtable(st.session_state.user_name, user_input, output)
                except Exception as e:
                    st.error(f"An error occurred: {e}")
+# Save the current session data to past sessions
+if st.session_state.user_name and st.session_state.chat_history:
+    current_session_data = {
+        'user_name': st.session_state.user_name,
+        'chat_history': st.session_state.chat_history
+    }
+    st.session_state.past.append(current_session_data)
