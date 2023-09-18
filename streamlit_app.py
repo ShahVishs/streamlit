@@ -133,6 +133,7 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
+
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
