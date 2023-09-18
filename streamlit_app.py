@@ -109,16 +109,19 @@ def load_previous_sessions():
     
     return previous_sessions
 
+# Inside the code block for starting a new session or switching to a previous session
 if st.button("Refresh Session"):
-    # Prompt for the user's name when refreshing the session
-    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    # Check if the user is switching to a previous session
+    if not st.session_state.new_session:
+        st.session_state.chat_history = []  # Clear the chat history for the current session
 
+    # Prompt for the user's name when starting a new session
+    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    
     # Assign the new name to user_name_input
     if user_name_input:
         st.session_state.user_name_input = user_name_input
         st.session_state.new_session = False  # Mark that it's not a new session
-    else:
-        st.session_state.user_name_input = None  # Clear the name if the input is empty
 
     # Save the current session and start a new one
     current_session = {
@@ -134,6 +137,17 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
+# Load previous chat sessions
+st.session_state.sessions = load_previous_sessions()
+
+# Check if it's a new session or switching to a previous session
+if st.session_state.new_session:
+    # Prompt for the user's name
+    user_name = st.text_input("Your name:")
+    
+    # Assign the name to session_state if provided
+    if user_name:
+        st.session_state.user_name = user_name
 
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
