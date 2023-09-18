@@ -65,6 +65,10 @@ if 'user_name' not in st.session_state:
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
+# Initialize a flag to track whether the name has been entered for the current session
+if 'name_entered' not in st.session_state:
+    st.session_state.name_entered = False
+
 # Function to save the current chat session
 def save_chat_session(session_data, session_id):
     session_filename = f"chat_sessions/chat_session_{session_id}.json"
@@ -104,6 +108,13 @@ def load_previous_sessions():
 
 # Create a Streamlit button for starting a new session
 if st.button("Refresh Session"):
+    # Check if the name has been entered for the current session
+    if not st.session_state.name_entered:
+        user_name = st.text_input("Your name:", placeholder="Enter your name")
+        if user_name:
+            st.session_state.user_name = user_name
+            st.session_state.name_entered = True
+    
     # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
@@ -129,6 +140,8 @@ for session_id in st.session_state.sessions.keys():
         # When a session ID is clicked, update the chat history to show messages for that session
         selected_session_data = st.session_state.sessions[session_id]
         st.session_state.chat_history = selected_session_data['chat_history']
+        # Set the name_entered flag to True to avoid asking for the name again
+        st.session_state.name_entered = True
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
@@ -281,8 +294,9 @@ with container:
         user_name = st.text_input("Your name:")
         if user_name:
             st.session_state.user_name = user_name
-            
-    with st.form(key='my_form', clear_on_submit=True):
+            st.session_state.name_entered = True
+    else:
+        with st.form(key='my_form', clear_on_submit=True):
         user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
         if user_input:
             st.write(f"**User:** {user_input}")
