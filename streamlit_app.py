@@ -297,12 +297,12 @@ with container:
             st.session_state.name_entered = True
     else:
         with st.form(key='my_form', clear_on_submit=True):
-        user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-        if user_input:
-            st.write(f"**User:** {user_input}")
-            # Add the user's question to the current session's chat history
-            st.session_state.chat_history.append((user_input, "AI's response here."))
-        submit_button = st.form_submit_button(label='Send')
+            user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
+            if user_input:
+                st.write(f"**User:** {user_input}")
+                # Add the user's question to the current session's chat history
+                st.session_state.chat_history.append((user_input, "AI's response here."))
+            submit_button = st.form_submit_button(label='Send')
     
     if submit_button and user_input:
         output = conversational_chat(user_input)
