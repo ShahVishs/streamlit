@@ -155,8 +155,8 @@ else:
     # If it's not a new session, set user_name_input to the existing user name
     st.session_state.user_name_input = st.session_state.user_name
 
-# Display the name input field only when it's a new session
-if st.session_state.new_session:
+# Display the name input field only when it's a new session and not inside a chat session
+if st.session_state.new_session and not st.session_state.in_chat_session:
     user_name = st.session_state.user_name_input
     if user_name:
         st.session_state.new_session = False  # Mark that it's not a new session
@@ -173,9 +173,10 @@ for session_id, session_data in st.session_state.sessions.items():
         # When a session ID is clicked, update the chat history to show messages for that session
         st.session_state.chat_history = session_data['chat_history']
         st.session_state.new_session = False  # Mark that it's not a new session
+        st.session_state.in_chat_session = True  # Mark that we are inside a chat session
     
-    # Add a session prompt for the user's name
-    if session_id == st.session_state.user_name:
+    # Add a session prompt for the user's name only if not in a chat session
+    if session_id == st.session_state.user_name and not st.session_state.in_chat_session:
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
             st.session_state.new_session = False  # Mark that it's not a new session
