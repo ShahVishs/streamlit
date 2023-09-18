@@ -94,9 +94,12 @@ def load_previous_sessions():
     # Load each chat session file
     for session_file in session_files:
         session_filename = os.path.join("chat_sessions", session_file)
+        
+        # Extract session ID from the file name
+        session_id = session_file.split("_")[-1].split(".json")[0]
+        
         with open(session_filename, "r") as session_file:
             session_data = json.load(session_file)
-            session_id = session_file.split("_")[-1].split(".")[0]
             previous_sessions[session_id] = session_data
     
     return previous_sessions
