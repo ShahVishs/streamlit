@@ -135,7 +135,7 @@ st.session_state.sessions = load_previous_sessions()
 # Prompt for the user's name if it's a new session or if the user is switching to a previous session
 if not st.session_state.user_name_input or st.session_state.new_session:
     if 'user_name_input' not in st.session_state:
-    st.session_state.user_name_input = st.session_state.user_name
+        st.session_state.user_name_input = st.session_state.user_name
     
     # Check if user_name_input is not None before setting it in session_state
     if user_name_input is not None:
