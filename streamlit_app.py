@@ -131,6 +131,9 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
+    # Update the user_name variable used for saving to Airtable
+    user_name = st.session_state.user_name
+
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
