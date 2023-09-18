@@ -108,9 +108,9 @@ def load_previous_sessions():
 
 # Create a Streamlit button for starting a new session
 if st.button("Refresh Session"):
-    # Check if it's a new session or switching to a previous session
-    if st.session_state.new_session:
-        user_name = st.text_input("Your name:", placeholder="Enter your name")
+    # Modify the logic for setting the user's name
+    if 'user_name' not in st.session_state or st.session_state.new_session:
+        user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
         if user_name:
             st.session_state.user_name = user_name
             st.session_state.new_session = False  # Mark that it's not a new session
@@ -269,12 +269,11 @@ def conversational_chat(user_input):
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-# Modify the logic for setting the user's name
-if 'user_name' not in st.session_state or st.session_state.new_session:
-    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+if st.session_state.user_name is None:
+    user_name = st.text_input("Your name:")
     if user_name:
         st.session_state.user_name = user_name
-        st.session_state.new_session = False  # Mark that it's not a new session
+        st.session_state.name_entered = True
 
 user_input = ""
 with st.form(key='my_form', clear_on_submit=True):
