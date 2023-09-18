@@ -137,8 +137,8 @@ if not st.session_state.user_name_input or st.session_state.new_session:
     # Prompt for the user's name
     user_name_input = st.text_input("Your name:", key='user_name_input', value=str(st.session_state.user_name))  # Convert to string
     
-    # Assign the new name to user_name_input
-    if user_name_input:
+    # Check if user_name_input is not None before setting it in session_state
+    if user_name_input is not None:
         st.session_state.user_name_input = user_name_input
         st.session_state.new_session = False  # Mark that it's not a new session
 
