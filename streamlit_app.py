@@ -112,8 +112,9 @@ def load_previous_sessions():
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
-    st.session_state.user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    if st.session_state.user_name:
+    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    st.session_state.user_name = user_name  # Update user name in session state
+    if user_name:
         st.session_state.new_session = False  # Mark that it's not a new session
 
     # Save the current session and start a new one
@@ -129,6 +130,7 @@ if st.button("Refresh Session"):
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
+
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
@@ -305,21 +307,9 @@ with response_container:
         user_name = st.session_state.user_name
         message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
         message(answer, key=f"{i}_answer", avatar_style="thumbs")
-response_container = st.container()
 
-with response_container:
-    for i, (query, answer) in enumerate(st.session_state.chat_history):
-        # Get the user's name from st.session_state.user_name
-        user_name = st.session_state.user_name
-        
-        # Display the user's name if it's defined, or a placeholder if it's not
-        if user_name:
-            message(f"{user_name}:", is_user=True, key=f"{i}_user", avatar_style="big-smile")
-        
-        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-        message(answer, key=f"{i}_answer", avatar_style="thumbs")
 
-    if st.session_state.user_name and output:
+    if st.session_state.user_name:
         try:
             save_chat_to_airtable(st.session_state.user_name, user_input, output)
         except Exception as e:
