@@ -80,7 +80,6 @@ if 'refreshing_session' not in st.session_state:
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
-# Function to save the current chat session
 def save_chat_session(session_data, session_id):
     session_filename = f"chat_sessions/chat_session_{session_id}.json"
     
@@ -90,8 +89,11 @@ def save_chat_session(session_data, session_id):
         'chat_history': session_data['chat_history']
     }
     
-    with open(session_filename, "w") as session_file:
-        json.dump(session_dict, session_file)
+    try:
+        with open(session_filename, "w") as session_file:
+            json.dump(session_dict, session_file)
+    except Exception as e:
+        st.error(f"An error occurred while saving the chat session: {e}")
 
 # Function to load previous chat sessions from files
 def load_previous_sessions():
