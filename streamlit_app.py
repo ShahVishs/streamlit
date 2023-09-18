@@ -60,7 +60,6 @@ business_details_text = [
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 # Initialize session state
-# Initialize session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
@@ -109,7 +108,7 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Inside the code block for starting a new session
+# Code block for starting a new session
 if st.button("Refresh Session"):
     # Clear the chat history for the current session
     st.session_state.chat_history = []
@@ -153,6 +152,22 @@ if not st.session_state.user_name_input or st.session_state.new_session:
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
+# Display a list of session names in the sidebar along with a delete button
+st.sidebar.header("Chat Sessions")
+
+for session_id, session_data in st.session_state.sessions.items():
+    session_key = f"session_{session_id}"
+    
+    if st.sidebar.button(f"Session {session_id}"):
+        # When a session ID is clicked, update the chat history to show messages for that session
+        st.session_state.chat_history = session_data['chat_history']
+        st.session_state.new_session = False  # Mark that it's not a new session
+    
+    # Add a session prompt for the user's name
+    if session_id == st.session_state.user_name:
+        st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
+        if st.session_state.user_name:
+            st.session_state.new_session = False  # Mark that it's not a new session
 
 
 # Display a list of session names in the sidebar along with a delete button
