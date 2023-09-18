@@ -65,9 +65,9 @@ if 'user_name' not in st.session_state:
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
-# Initialize a flag to track whether the name has been entered for the current session
-if 'name_entered' not in st.session_state:
-    st.session_state.name_entered = False
+# Initialize a flag to track whether the session is new or switching to a previous session
+if 'new_session' not in st.session_state:
+    st.session_state.new_session = True
 
 # Function to save the current chat session
 def save_chat_session(session_data, session_id):
@@ -108,12 +108,12 @@ def load_previous_sessions():
 
 # Create a Streamlit button for starting a new session
 if st.button("Refresh Session"):
-    # Check if the name has been entered for the current session
-    if not st.session_state.name_entered:
+    # Check if it's a new session or switching to a previous session
+    if st.session_state.new_session:
         user_name = st.text_input("Your name:", placeholder="Enter your name")
         if user_name:
             st.session_state.user_name = user_name
-            st.session_state.name_entered = True
+            st.session_state.new_session = False  # Mark that it's not a new session
     
     # Save the current session and start a new one
     current_session = {
@@ -140,8 +140,7 @@ for session_id in st.session_state.sessions.keys():
         # When a session ID is clicked, update the chat history to show messages for that session
         selected_session_data = st.session_state.sessions[session_id]
         st.session_state.chat_history = selected_session_data['chat_history']
-        # Set the name_entered flag to True to avoid asking for the name again
-        st.session_state.name_entered = True
+        st.session_state.new_session = False  # Mark that it's not a new session
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
