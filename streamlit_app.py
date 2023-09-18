@@ -69,7 +69,7 @@ if 'sessions' not in st.session_state:
 
 # Function to save the current chat session
 def save_chat_session(session_data, session_id):
-    session_filename = f"chat_session_{session_id}.json"
+    session_filename = f"chat_sessions/chat_session_{session_id}.json"
     
     # Convert session_data to a dictionary
     session_dict = {
@@ -86,7 +86,7 @@ def load_previous_sessions():
     
     # Check if the chat_sessions folder exists
     if not os.path.exists("chat_sessions"):
-        return previous_sessions
+        os.makedirs("chat_sessions")
     
     # Get a list of chat session files
     session_files = os.listdir("chat_sessions")
