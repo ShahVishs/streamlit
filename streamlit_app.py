@@ -289,12 +289,6 @@ def conversational_chat(user_input):
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-if st.session_state.user_name is None:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
-        st.session_state.name_entered = True
-
 user_input = ""
 with st.form(key='my_form', clear_on_submit=True):
     user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
@@ -324,4 +318,5 @@ with response_container:
         try:
             save_chat_to_airtable(st.session_state.user_name, user_input, output)
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            pass
+            # st.error(f"An error occurred: {e}")
