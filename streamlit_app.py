@@ -135,7 +135,7 @@ st.session_state.sessions = load_previous_sessions()
 # Prompt for the user's name if it's a new session or if the user is switching to a previous session
 if not st.session_state.user_name_input or st.session_state.new_session:
     # Prompt for the user's name
-    user_name_input = st.text_input("Your name:", key='user_name_input_widget', value=st.session_state.user_name)
+    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
     # Assign the new name to user_name_input
     if user_name_input:
         st.session_state.user_name_input = user_name_input
@@ -147,7 +147,6 @@ if not st.session_state.user_name_input or st.session_state.new_session:
     # Assign the name to session_state if provided
     if user_name:
         st.session_state.user_name = user_name
-
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
