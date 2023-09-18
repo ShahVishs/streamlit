@@ -152,13 +152,6 @@ for session_id, session_data in st.session_state.sessions.items():
         if st.session_state.user_name:
             st.session_state.new_session = False  # Mark that it's not a new session
 
-    # Add a delete button for the current session
-    if st.sidebar.button(f"Delete Session {session_id}"):
-        if session_id in st.session_state.sessions:
-            del st.session_state.sessions[session_id]
-            # Optionally, you can delete the corresponding JSON file here if needed.
-            # os.remove(f"chat_sessions/chat_session_{session_id}.json"
-
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
