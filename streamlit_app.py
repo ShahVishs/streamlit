@@ -59,17 +59,17 @@ business_details_text = [
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
-# Define a list to store past chat sessions
-past_sessions = []
-
-# Create the "chat_sessions" folder if it doesn't exist
-if not os.path.exists("chat_sessions"):
-    os.makedirs("chat_sessions")
+# Initialize session state
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = None
+if 'sessions' not in st.session_state:
+    st.session_state.sessions = {}
 
 # Function to save the current chat session
-def save_chat_session(session_data):
-    current_time = datetime.now().strftime("%Y%m%d%H%M%S")
-    session_filename = f"chat_session_{current_time}.json"
+def save_chat_session(session_data, session_id):
+    session_filename = f"chat_session_{session_id}.json"
     
     # Convert session_data to a dictionary
     session_dict = {
@@ -77,12 +77,12 @@ def save_chat_session(session_data):
         'chat_history': session_data['chat_history']
     }
     
-    with open(os.path.join("chat_sessions", session_filename), "w") as session_file:
+    with open(session_filename, "w") as session_file:
         json.dump(session_dict, session_file)
 
 # Function to load previous chat sessions from files
 def load_previous_sessions():
-    previous_sessions = []
+    previous_sessions = {}
     
     # Check if the chat_sessions folder exists
     if not os.path.exists("chat_sessions"):
@@ -96,31 +96,10 @@ def load_previous_sessions():
         session_filename = os.path.join("chat_sessions", session_file)
         with open(session_filename, "r") as session_file:
             session_data = json.load(session_file)
-            previous_sessions.append(session_data)
+            session_id = session_file.split("_")[-1].split(".")[0]
+            previous_sessions[session_id] = session_data
     
     return previous_sessions
-
-# Create a Streamlit sidebar to display previous sessions
-st.sidebar.header("Previous Sessions")
-
-# Load previous chat sessions
-past_sessions = load_previous_sessions()
-
-# Display a list of session names
-selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
-
-# Display the selected session's chat history in the main area
-st.title("Chat Session History")
-
-if selected_session:
-    session_index = int(selected_session.split()[-1]) - 1
-    selected_session_data = past_sessions[session_index]
-    
-    st.header(selected_session)
-    
-    for question, answer in selected_session_data["chat_history"]:
-        st.write(f"**User:** {question}")
-        st.write(f"**AI:** {answer}")
 
 # Create a Streamlit button for starting a new session
 if st.button("Refresh Session"):
@@ -129,11 +108,33 @@ if st.button("Refresh Session"):
         'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
-    save_chat_session(current_session)
+    
+    # Generate a unique session_id based on the timestamp
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
+    
+    save_chat_session(current_session, session_id)
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
-    st.session_state.user_name = None
+
+# Load previous chat sessions
+st.session_state.sessions = load_previous_sessions()
+
+# Display a list of session names in the sidebar
+st.sidebar.header("Previous Sessions")
+selected_session = st.sidebar.selectbox("Select a session:", list(st.session_state.sessions.keys()))
+
+# Display the selected session's chat history in the main area
+st.title("Chat Session History")
+
+if selected_session:
+    selected_session_data = st.session_state.sessions[selected_session]
+    
+    st.header(f"Session {selected_session}")
+    
+    for question, answer in selected_session_data["chat_history"]:
+        st.write(f"**User:** {question}")
+        st.write(f"**AI:** {answer}")
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
