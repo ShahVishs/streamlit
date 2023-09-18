@@ -111,11 +111,13 @@ def load_previous_sessions():
 
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
-    # Prompt for the user's name when refreshing the session
-    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    st.session_state.user_name = user_name  # Update user name in session state
-    if user_name:
-        st.session_state.new_session = False  # Mark that it's not a new session
+    # Check if it's a new session or switching to a previous session
+    if st.session_state.new_session:
+        # Prompt for the user's name when starting a new session
+        user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+        st.session_state.user_name = user_name  # Update user name in session state
+        if user_name:
+            st.session_state.new_session = False  # Mark that it's not a new session
 
     # Save the current session and start a new one
     current_session = {
@@ -292,14 +294,22 @@ with st.form(key='my_form', clear_on_submit=True):
 if submit_button and user_input:
     output = conversational_chat(user_input)
     st.session_state.chat_history.append((user_input, output))
+    
+    # Save the current session data to past sessions
+    if st.session_state.user_name and output:  # Check if output is defined
+        current_session_data = {
+            'user_name': st.session_state.user_name,
+            'chat_history': st.session_state.chat_history
+        }
+        st.session_state.past.append(current_session_data)
 
-# Save the current session data to past sessions
-if st.session_state.user_name and st.session_state.chat_history:
-    current_session_data = {
-        'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history
-    }
-    st.session_state.past.append(current_session_data)
+# # Save the current session data to past sessions
+# if st.session_state.user_name and st.session_state.chat_history:
+#     current_session_data = {
+#         'user_name': st.session_state.user_name,
+#         'chat_history': st.session_state.chat_history
+#     }
+#     st.session_state.past.append(current_session_data)
 
 with response_container:
     for i, (query, answer) in enumerate(st.session_state.chat_history):
