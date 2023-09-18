@@ -60,10 +60,13 @@ business_details_text = [
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 # Initialize session state
+# Initialize session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-if 'sessions' not in st.session_state:
-    st.session_state.sessions = {}
+
+# Initialize user_name_input in session state
+if 'user_name_input' not in st.session_state:
+    st.session_state.user_name_input = None
 
 # Initialize a flag to track whether the session is new or switching to a previous session
 if 'new_session' not in st.session_state:
