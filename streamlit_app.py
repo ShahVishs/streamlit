@@ -109,20 +109,13 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Inside the code block for starting a new session or switching to a previous session
+# Inside the code block for starting a new session
 if st.button("Refresh Session"):
-    # Check if the user is switching to a previous session
-    if not st.session_state.new_session:
-        st.session_state.chat_history = []  # Clear the chat history for the current session
+    # Clear the chat history for the current session
+    st.session_state.chat_history = []
 
-    # Prompt for the user's name when starting a new session
-    if st.session_state.new_session:  # Only show the name input for a new session
-        user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-        
-        # Assign the new name to user_name_input
-        if user_name_input:
-            st.session_state.user_name_input = user_name_input
-            st.session_state.new_session = False  # Mark that it's not a new session
+    # Generate a unique session_id based on the timestamp
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
 
     # Save the current session and start a new one
     current_session = {
@@ -130,25 +123,36 @@ if st.button("Refresh Session"):
         'chat_history': st.session_state.chat_history
     }
 
-    # Generate a unique session_id based on the timestamp
-    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-
     save_chat_session(current_session, session_id)
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
+    st.session_state.user_name_input = None  # Reset the user_name_input
+    st.session_state.user_name = None  # Reset the user_name
 
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
-# Check if it's a new session or switching to a previous session
-if st.session_state.new_session:
+# Prompt for the user's name if it's a new session or if the user is switching to a previous session
+if not st.session_state.user_name_input or st.session_state.new_session:
     # Prompt for the user's name
-    user_name = st.text_input("Your name:")
+    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    
+    # Assign the new name to user_name_input
+    if user_name_input:
+        st.session_state.user_name_input = user_name_input
+        st.session_state.new_session = False  # Mark that it's not a new session
+
+    # Display the name input for a new session
+    user_name = st.session_state.user_name_input
     
     # Assign the name to session_state if provided
     if user_name:
         st.session_state.user_name = user_name
+
+# Load previous chat sessions
+st.session_state.sessions = load_previous_sessions()
+
 
 
 # Display a list of session names in the sidebar along with a delete button
