@@ -81,7 +81,12 @@ if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
 def save_chat_session(session_data, session_id):
-    session_filename = f"chat_sessions/chat_session_{session_id}.json"
+    session_directory = "chat_sessions"
+    session_filename = f"{session_directory}/chat_session_{session_id}.json"
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(session_directory):
+        os.makedirs(session_directory)
     
     # Convert session_data to a dictionary
     session_dict = {
@@ -94,7 +99,6 @@ def save_chat_session(session_data, session_id):
             json.dump(session_dict, session_file)
     except Exception as e:
         st.error(f"An error occurred while saving the chat session: {e}")
-
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
