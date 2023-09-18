@@ -60,8 +60,6 @@ business_details_text = [
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 # Initialize session state
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 if 'sessions' not in st.session_state:
@@ -125,17 +123,29 @@ st.session_state.sessions = load_previous_sessions()
 
 # Display a list of session names in the sidebar
 st.sidebar.header("Previous Sessions")
-selected_session = st.sidebar.selectbox("Select a session:", list(st.session_state.sessions.keys()))
+selected_session = st.sidebar.selectbox("Select a session:", list(st.session_state.sessions.keys()), index=0)
 
 # Display the selected session's chat history in the main area
-st.title("Chat Session History")
+st.title(f"Chat Session {selected_session}")
+selected_session_data = st.session_state.sessions.get(selected_session, {'user_name': '', 'chat_history': []})
 
-if selected_session:
-    selected_session_data = st.session_state.sessions[selected_session]
-    
-    st.header(f"Session {selected_session}")
-    
-    for question, answer in selected_session_data["chat_history"]:
+if st.session_state.user_name is None:
+    user_name = st.text_input("Your name:")
+    if user_name:
+        st.session_state.user_name = user_name
+
+with st.form(key='my_form', clear_on_submit=True):
+    user_input = st.text_input("Query:", placeholder="Type your question here (:")
+    if user_input:
+        st.write(f"**User:** {user_input}")
+    submit_button = st.form_submit_button(label='Send')
+
+if submit_button and user_input:
+    selected_session_data['chat_history'].append((user_input, "AI's response here."))
+
+if selected_session_data['chat_history']:
+    st.header("Chat History")
+    for question, answer in selected_session_data['chat_history']:
         st.write(f"**User:** {question}")
         st.write(f"**AI:** {answer}")
 file_1 = r'dealer_1_inventry.csv'
