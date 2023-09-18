@@ -262,6 +262,8 @@ airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_
 def save_chat_to_airtable(user_name, user_input, output):
     try:
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        # Update the user_name in the Airtable insert function
+        user_name = st.session_state.user_name
         airtable.insert(
             {
                 "username": user_name,
