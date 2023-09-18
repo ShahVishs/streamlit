@@ -247,7 +247,6 @@ prompt = OpenAIFunctionsAgent.create_prompt(
     system_message=system_message,
     extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
 )
-
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
 
 if 'agent_executor' not in st.session_state:
