@@ -321,7 +321,6 @@ with response_container:
         message(answer, key=f"{i}_answer", avatar_style="thumbs")
 
     if st.session_state.user_name and user_input:
-        output = conversational_chat(user_input)  # Define 'output' here
         try:
             save_chat_to_airtable(st.session_state.user_name, user_input, output)
         except Exception as e:
