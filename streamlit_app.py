@@ -109,15 +109,16 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
     user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    
+
     # Assign the new name to user_name_input
     if user_name_input:
         st.session_state.user_name_input = user_name_input
         st.session_state.new_session = False  # Mark that it's not a new session
+    else:
+        st.session_state.user_name_input = None  # Clear the name if the input is empty
 
     # Save the current session and start a new one
     current_session = {
