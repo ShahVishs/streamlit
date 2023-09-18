@@ -125,34 +125,10 @@ st.session_state.sessions = load_previous_sessions()
 st.sidebar.header("Chat Sessions")
 
 for session_id in st.session_state.sessions.keys():
-    st.sidebar.write(f"Session {session_id}")
-
-# Allow selecting a session from the sidebar
-selected_session = st.sidebar.selectbox("Select a session:", list(st.session_state.sessions.keys()), index=0)
-
-# Display the selected session's chat history in the main area
-st.title(f"Chat Session {selected_session}")
-selected_session_data = st.session_state.sessions.get(selected_session, {'user_name': '', 'chat_history': []})
-
-if st.session_state.user_name is None:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
-
-with st.form(key='my_form', clear_on_submit=True):
-    user_input = st.text_input("Query:", placeholder="Type your question here (:")
-    if user_input:
-        st.write(f"**User:** {user_input}")
-    submit_button = st.form_submit_button(label='Send')
-
-if submit_button and user_input:
-    selected_session_data['chat_history'].append((user_input, "AI's response here."))
-
-if selected_session_data['chat_history']:
-    st.header("Chat History")
-    for question, answer in selected_session_data['chat_history']:
-        st.write(f"**User:** {question}")
-        st.write(f"**AI:** {answer}")
+    if st.sidebar.button(f"Session {session_id}"):
+        # When a session ID is clicked, update the chat history to show messages for that session
+        selected_session_data = st.session_state.sessions[session_id]
+        st.session_state.chat_history = selected_session_data['chat_history']
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
