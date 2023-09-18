@@ -106,7 +106,7 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Create a Streamlit button for starting a new session
+# Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Modify the logic for setting the user's name
     if 'user_name' not in st.session_state or st.session_state.new_session:
