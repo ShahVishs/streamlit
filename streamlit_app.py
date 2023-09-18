@@ -122,7 +122,14 @@ if st.button("Refresh Session"):
 st.session_state.sessions = load_previous_sessions()
 
 # Display a list of session names in the sidebar
-st.sidebar.header("Previous Sessions")
+st.sidebar.header("Chat Sessions")
+
+for session_id, session_data in st.session_state.sessions.items():
+    st.sidebar.subheader(f"Session {session_id}")
+    st.sidebar.write(f"User: {session_data['user_name']}")
+    st.sidebar.write(f"Messages: {len(session_data['chat_history'])}")
+
+# Allow selecting a session from the sidebar
 selected_session = st.sidebar.selectbox("Select a session:", list(st.session_state.sessions.keys()), index=0)
 
 # Display the selected session's chat history in the main area
