@@ -68,9 +68,13 @@ if 'user_name' not in st.session_state:
 if 'user_name_input' not in st.session_state:
     st.session_state.user_name_input = None
 
-# Initialize a flag to track whether the session is new or switching to a previous session
+# Initialize a flag to track whether the session is new or refreshing
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
+
+# Add refreshing_session to the session state and set its initial value to False
+if 'refreshing_session' not in st.session_state:
+    st.session_state.refreshing_session = False
 
 # Function to save the current chat session
 def save_chat_session(session_data, session_id):
@@ -108,6 +112,7 @@ def load_previous_sessions():
             previous_sessions[session_id] = session_data
     
     return previous_sessions
+
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
