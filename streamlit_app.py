@@ -318,5 +318,5 @@ with response_container:
         try:
             save_chat_to_airtable(st.session_state.user_name, user_input, output)
         except Exception as e:
-            pass
-            # st.error(f"An error occurred: {e}")
+            # pass
+            st.error(f"An error occurred: {e}")
