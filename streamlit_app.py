@@ -106,9 +106,10 @@ def load_previous_sessions():
     
     return previous_sessions
 
+# Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
-    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    user_name = st.text_input("Your name:", key='user_name_input', value=None)
     if user_name:
         st.session_state.user_name = user_name
         st.session_state.new_session = False  # Mark that it's not a new session
@@ -266,6 +267,9 @@ airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_
 def save_chat_to_airtable(user_name, user_input, output):
     try:
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        # Check if a new name is provided during the session refresh
+        if st.session_state.user_name != st.session_state.user_name_input:
+            user_name = st.session_state.user_name_input
         airtable.insert(
             {
                 "username": user_name,
@@ -275,7 +279,7 @@ def save_chat_to_airtable(user_name, user_input, output):
             }
         )
     except Exception as e:
-        st.error(f"An error occurred while saving data to Airtable: {e}")
+        st.error(f"An error occurred while saving data to Airtable: {e}"
 
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
