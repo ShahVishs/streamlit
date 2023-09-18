@@ -141,6 +141,7 @@ for session_id in st.session_state.sessions.keys():
         selected_session_data = st.session_state.sessions[session_id]
         st.session_state.chat_history = selected_session_data['chat_history']
         st.session_state.new_session = False  # Mark that it's not a new session
+
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
@@ -149,32 +150,12 @@ embeddings = OpenAIEmbeddings()
 vectorstore_1 = FAISS.from_documents(docs_1, embeddings)
 retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
 
-# file_2 = r'appointment.csv'
-# loader = CSVLoader(file_path=file_2)
-# docs_2 = loader.load()
-# embeddings = OpenAIEmbeddings()
-# vectorstore_2 = FAISS.from_documents(docs_2, embeddings)
-
-# retriever_2 = vectorstore_2.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
-
-
 # Create the first tool
 tool1 = create_retriever_tool(
     retriever_1, 
      "search_car_dealership_inventory",
      "Searches and returns documents regarding the car inventory and Input should be a single string strictly."
 )
-
-# # Create the second tool
-# tool2 = create_retriever_tool(
-#     retriever_2, 
-#     "search_appointment",
-# #     "Searches and returns documents related to the appointments scheduling."
-#     "Use to schedule an appointment for a given date and time. The input to this tool should be a comma separated\
-#     list of 2 strings: date and time in format: mm/dd/yy, hh,\
-#     convert date and time to these formats. For example, `12/31/23, 10:00` \
-#     would be the input for Dec 31'st 2023 at 10am."
-# )
 
 # Create the third tool
 tool3 = create_retriever_tool(
@@ -288,32 +269,32 @@ def conversational_chat(user_input):
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-with container:
-    if st.session_state.user_name is None:
-        user_name = st.text_input("Your name:")
-        if user_name:
-            st.session_state.user_name = user_name
-            st.session_state.name_entered = True
-    else:
-        with st.form(key='my_form', clear_on_submit=True):
-            user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-            if user_input:
-                st.write(f"**User:** {user_input}")
-                # Add the user's question to the current session's chat history
-                st.session_state.chat_history.append((user_input, "AI's response here."))
-            submit_button = st.form_submit_button(label='Send')
-    
-    if submit_button and user_input:
-        output = conversational_chat(user_input)
-        st.session_state.chat_history.append((user_input, output))
+if st.session_state.user_name is None:
+    user_name = st.text_input("Your name:")
+    if user_name:
+        st.session_state.user_name = user_name
+        st.session_state.name_entered = True
 
-    # Save the current session data to past sessions
-    if st.session_state.user_name and st.session_state.chat_history:
-        current_session_data = {
-            'user_name': st.session_state.user_name,
-            'chat_history': st.session_state.chat_history
-        }
-        st.session_state.past.append(current_session_data)
+user_input = ""
+with st.form(key='my_form', clear_on_submit=True):
+    user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
+    if user_input:
+        st.write(f"**User:** {user_input}")
+        # Add the user's question to the current session's chat history
+        st.session_state.chat_history.append((user_input, "AI's response here."))
+    submit_button = st.form_submit_button(label='Send')
+
+if submit_button and user_input:
+    output = conversational_chat(user_input)
+    st.session_state.chat_history.append((user_input, output))
+
+# Save the current session data to past sessions
+if st.session_state.user_name and st.session_state.chat_history:
+    current_session_data = {
+        'user_name': st.session_state.user_name,
+        'chat_history': st.session_state.chat_history
+    }
+    st.session_state.past.append(current_session_data)
 
 with response_container:
     for i, (query, answer) in enumerate(st.session_state.chat_history):
