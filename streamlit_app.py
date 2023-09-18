@@ -317,9 +317,8 @@ with response_container:
         if user_name:
             message(f"{user_name}:", is_user=True, key=f"{i}_user", avatar_style="big-smile")
         
-        message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
-        message(answer, key=f"{i}_answer", avatar_style="thumbs")
-
+        message(query, is_user=True, key=f"{i}_user_query", avatar_style="big-smile")
+        message(answer, key=f"{i}_user_answer", avatar_style="thumbs")
     if st.session_state.user_name and user_input:
         try:
             save_chat_to_airtable(st.session_state.user_name, user_input, output)
