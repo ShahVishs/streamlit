@@ -62,6 +62,8 @@ retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_ret
 # Initialize session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
+if 'session_count' not in st.session_state:
+    st.session_state.session_count = 0
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
@@ -83,22 +85,12 @@ def load_previous_sessions():
     previous_sessions = {}
     
     # Check if the chat_sessions folder exists
-    if not os.path.exists("chat_sessions"):
-        os.makedirs("chat_sessions")
-    
-    # Get a list of chat session files
-    session_files = os.listdir("chat_sessions")
+    if not st.session_state.sessions:
+        return previous_sessions
     
     # Load each chat session file
-    for session_file in session_files:
-        session_filename = os.path.join("chat_sessions", session_file)
-        
-        # Extract session ID from the file name
-        session_id = session_file.split("_")[-1].split(".json")[0]
-        
-        with open(session_filename, "r") as session_file:
-            session_data = json.load(session_file)
-            previous_sessions[session_id] = session_data
+    for session_id, session_data in st.session_state.sessions.items():
+        previous_sessions[session_id] = session_data
     
     return previous_sessions
 
@@ -110,13 +102,17 @@ if st.button("Refresh Session"):
         'chat_history': st.session_state.chat_history
     }
     
-    # Generate a unique session_id based on the timestamp
-    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
+    # Increment the session count
+    st.session_state.session_count += 1
     
-    save_chat_session(current_session, session_id)
+    # Use the session count as the session name (e.g., Session 1, Session 2, ...)
+    session_name = f"Session {st.session_state.session_count}"
+    
+    save_chat_session(current_session, session_name)
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
+    st.session_state.user_name = None
 
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
@@ -125,7 +121,7 @@ st.session_state.sessions = load_previous_sessions()
 st.sidebar.header("Chat Sessions")
 
 for session_id, session_data in st.session_state.sessions.items():
-    st.sidebar.subheader(f"Session {session_id}")
+    st.sidebar.subheader(session_id)
     st.sidebar.write(f"User: {session_data['user_name']}")
     st.sidebar.write(f"Messages: {len(session_data['chat_history'])}")
 
@@ -135,6 +131,12 @@ selected_session = st.sidebar.selectbox("Select a session:", list(st.session_sta
 # Display the selected session's chat history in the main area
 st.title(f"Chat Session {selected_session}")
 selected_session_data = st.session_state.sessions.get(selected_session, {'user_name': '', 'chat_history': []})
+
+if selected_session_data['chat_history']:
+    st.header("Chat History")
+    for question, answer in selected_session_data['chat_history']:
+        st.write(f"**User:** {question}")
+        st.write(f"**AI:** {answer}")
 
 if st.session_state.user_name is None:
     user_name = st.text_input("Your name:")
@@ -149,12 +151,6 @@ with st.form(key='my_form', clear_on_submit=True):
 
 if submit_button and user_input:
     selected_session_data['chat_history'].append((user_input, "AI's response here."))
-
-if selected_session_data['chat_history']:
-    st.header("Chat History")
-    for question, answer in selected_session_data['chat_history']:
-        st.write(f"**User:** {question}")
-        st.write(f"**AI:** {answer}")
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
