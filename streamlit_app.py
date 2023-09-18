@@ -277,6 +277,12 @@ def save_chat_to_airtable(user_name, user_input, output):
 
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
+    
+    # Update the user's name in session state if a new name is provided
+    if st.session_state.user_name_input:
+        st.session_state.user_name = st.session_state.user_name_input
+        st.session_state.user_name_input = None  # Reset the user_name_input
+    
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
