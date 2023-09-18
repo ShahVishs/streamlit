@@ -132,15 +132,19 @@ if st.button("Refresh Session"):
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
-# Display a list of session names in the sidebar
+# Display a list of session names in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
-for session_id in st.session_state.sessions.keys():
+for session_id, session_data in st.session_state.sessions.items():
     if st.sidebar.button(f"Session {session_id}"):
         # When a session ID is clicked, update the chat history to show messages for that session
-        selected_session_data = st.session_state.sessions[session_id]
-        st.session_state.chat_history = selected_session_data['chat_history']
+        st.session_state.chat_history = session_data['chat_history']
         st.session_state.new_session = False  # Mark that it's not a new session
+    
+    # Add a delete button for each session
+    if st.sidebar.button(f"Delete Session {session_id}"):
+        if session_id in st.session_state.sessions:
+            del st.session_state.sessions[session_id]
 
 file_1 = r'dealer_1_inventry.csv'
 
@@ -278,13 +282,10 @@ if st.session_state.user_name is None:
 user_input = ""
 with st.form(key='my_form', clear_on_submit=True):
     user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-    if user_input:
-        st.write(f"**User:** {user_input}")
-        # Add the user's question to the current session's chat history
-        st.session_state.chat_history.append((user_input, "AI's response here."))
     submit_button = st.form_submit_button(label='Send')
 
 if submit_button and user_input:
+    st.write(f"**User:** {user_input}")
     output = conversational_chat(user_input)
     st.session_state.chat_history.append((user_input, output))
 
