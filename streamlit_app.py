@@ -76,6 +76,10 @@ if 'new_session' not in st.session_state:
 if 'refreshing_session' not in st.session_state:
     st.session_state.refreshing_session = False
 
+# Initialize the sessions attribute in the session state
+if 'sessions' not in st.session_state:
+    st.session_state.sessions = {}
+
 # Function to save the current chat session
 def save_chat_session(session_data, session_id):
     session_filename = f"chat_sessions/chat_session_{session_id}.json"
