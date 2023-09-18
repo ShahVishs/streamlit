@@ -136,7 +136,6 @@ st.session_state.sessions = load_previous_sessions()
 if not st.session_state.user_name_input or st.session_state.new_session:
     # Prompt for the user's name
     user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    
     # Assign the new name to user_name_input
     if user_name_input:
         st.session_state.user_name_input = user_name_input
