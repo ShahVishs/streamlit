@@ -106,7 +106,6 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
@@ -143,18 +142,18 @@ for session_id, session_data in st.session_state.sessions.items():
         st.session_state.chat_history = session_data['chat_history']
         st.session_state.new_session = False  # Mark that it's not a new session
     
-    # Add a delete button for each session
-    if st.sidebar.button(f"Delete Session {session_id}"):
-        if session_id in st.session_state.sessions:
-            del st.session_state.sessions[session_id]
-            # Optionally, you can delete the corresponding JSON file here if needed.
-            # os.remove(f"chat_sessions/chat_session_{session_id}.json")
-
     # Add a session prompt for the user's name
     if session_id == st.session_state.user_name:
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
             st.session_state.new_session = False  # Mark that it's not a new session
+
+    # Add a delete button for the current session
+    if st.sidebar.button(f"Delete Session {session_id}"):
+        if session_id in st.session_state.sessions:
+            del st.session_state.sessions[session_id]
+            # Optionally, you can delete the corresponding JSON file here if needed.
+            # os.remove(f"chat_sessions/chat_session_{session_id}.json"
 
 file_1 = r'dealer_1_inventry.csv'
 
@@ -295,7 +294,6 @@ with st.form(key='my_form', clear_on_submit=True):
     submit_button = st.form_submit_button(label='Send')
 
 if submit_button and user_input:
-    st.write(f"**User:** {user_input}")
     output = conversational_chat(user_input)
     st.session_state.chat_history.append((user_input, output))
 
