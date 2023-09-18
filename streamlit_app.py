@@ -59,12 +59,17 @@ business_details_text = [
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
-# Create a Streamlit sidebar to display previous sessions
-st.sidebar.header("Previous Sessions")
+# Define a list to store past chat sessions
+past_sessions = []
+
+# Create the "chat_sessions" folder if it doesn't exist
+if not os.path.exists("chat_sessions"):
+    os.makedirs("chat_sessions")
 
 # Function to save the current chat session
-def save_chat_session(session_data, session_id):
-    session_filename = f"chat_session_{session_id}.json"
+def save_chat_session(session_data):
+    current_time = datetime.now().strftime("%Y%m%d%H%M%S")
+    session_filename = f"chat_session_{current_time}.json"
     
     # Convert session_data to a dictionary
     session_dict = {
@@ -95,39 +100,11 @@ def load_previous_sessions():
     
     return previous_sessions
 
+# Create a Streamlit sidebar to display previous sessions
+st.sidebar.header("Previous Sessions")
+
 # Load previous chat sessions
 past_sessions = load_previous_sessions()
-
-# Initialize session state
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
-if 'user_name' not in st.session_state:
-    st.session_state.user_name = None
-
-# Determine if this is a completely new session or returning to a previous one
-completely_new_session = st.button("Start New Session")
-
-# If it's a completely new session or there is no previous session, ask for the user's name
-if completely_new_session or not past_sessions:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
-
-# Create a Streamlit button for starting a new session
-if st.button("Refresh Session"):
-    # Save the current session and start a new one
-    current_session = {
-        'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history
-    }
-    
-    # Generate a unique session_id based on the timestamp
-    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-    
-    save_chat_session(current_session, session_id)
-
-    # Clear session state variables to start a new session
-    st.session_state.chat_history = []
 
 # Display a list of session names
 selected_session = st.sidebar.selectbox("Select a session:", [f"Session {i + 1}" for i in range(len(past_sessions))])
@@ -145,7 +122,18 @@ if selected_session:
         st.write(f"**User:** {question}")
         st.write(f"**AI:** {answer}")
 
+# Create a Streamlit button for starting a new session
+if st.button("Refresh Session"):
+    # Save the current session and start a new one
+    current_session = {
+        'user_name': st.session_state.user_name,
+        'chat_history': st.session_state.chat_history
+    }
+    save_chat_session(current_session)
 
+    # Clear session state variables to start a new session
+    st.session_state.chat_history = []
+    st.session_state.user_name = None
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
