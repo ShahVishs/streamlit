@@ -113,8 +113,8 @@ def load_previous_sessions():
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    st.session_state.user_name = user_name  # Update user name in session state
     if user_name:
+        st.session_state.user_name = user_name  # Update user name in session state
         st.session_state.new_session = False  # Mark that it's not a new session
 
     # Save the current session and start a new one
@@ -130,7 +130,6 @@ if st.button("Refresh Session"):
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
-
 # Load previous chat sessions
 st.session_state.sessions = load_previous_sessions()
 
