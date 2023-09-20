@@ -7,3 +7,9 @@ tabulate
 streamlit_chat
 chromadb 
 faiss-cpu
+gspread
+pytz 
+psycopg2-binary
+SQLAlchemy
+google-auth
+airtable-python-wrapper
