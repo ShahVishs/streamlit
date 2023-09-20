@@ -147,12 +147,21 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
+
 # Load previous chat sessions
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
 else:
     # If it's not a new session, set user_name_input to the existing user name
     st.session_state.user_name_input = st.session_state.user_name
+
+# Display the name input field only when it's a new session
+if st.session_state.new_session:
+    user_name = st.session_state.user_name_input
+    if user_name:
+        st.session_state.new_session = False  # Mark that it's not a new session
+else:
+    user_name = st.session_state.user_name
 
 # Display a list of session names in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
@@ -294,26 +303,33 @@ def save_chat_to_airtable(user_name, user_input, output):
 
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
-    # Append the user input and agent's response to chat history only once
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-if st.session_state.user_name:
-    with st.form(key='my_form', clear_on_submit=True):
-        user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
-        submit_button = st.form_submit_button(label='Send')
+if st.session_state.user_name is None:
+    user_name = st.text_input("Your name:")
+    if user_name:
+        st.session_state.user_name = user_name
+        st.session_state.name_entered = True
 
-    if submit_button and user_input:
-        output = conversational_chat(user_input)
-        # st.session_state.chat_history.append((user_input, output))
+user_input = ""
+output = ""  # Define output variable here
 
-    # Save the current session data to past sessions
-    if st.session_state.user_name and st.session_state.chat_history:
-        current_session_data = {
-            'user_name': st.session_state.user_name,
-            'chat_history': st.session_state.chat_history
-        }
-        st.session_state.past.append(current_session_data)
+with st.form(key='my_form', clear_on_submit=True):
+    user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
+    submit_button = st.form_submit_button(label='Send')
+
+if submit_button and user_input:
+    output = conversational_chat(user_input)
+    st.session_state.chat_history.append((user_input, output))
+
+# Save the current session data to past sessions
+if st.session_state.user_name and st.session_state.chat_history:
+    current_session_data = {
+        'user_name': st.session_state.user_name,
+        'chat_history': st.session_state.chat_history
+    }
+    st.session_state.past.append(current_session_data)
 
 with response_container:
     for i, (query, answer) in enumerate(st.session_state.chat_history):
