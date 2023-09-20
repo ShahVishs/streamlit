@@ -122,6 +122,10 @@ def load_previous_sessions():
     
     return previous_sessions
 
+# Initialize session state variables
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = None
+
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
@@ -145,6 +149,22 @@ if st.button("Refresh Session"):
 
 # Display a list of past sessions in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
+
+if st.session_state.refreshing_session:
+    st.session_state.new_session = True
+    st.session_state.refreshing_session = False
+
+if st.session_state.new_session:
+    st.session_state.sessions = load_previous_sessions()
+else:
+    st.session_state.user_name_input = st.session_state.user_name
+
+if st.session_state.new_session:
+    user_name = st.session_state.user_name_input
+    if user_name:
+        st.session_state.new_session = False
+else:
+    user_name = st.session_state.user_name
 
 for i, session_data in enumerate(st.session_state.past):
     user_name = session_data['user_name']
