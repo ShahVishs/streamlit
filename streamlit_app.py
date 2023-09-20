@@ -31,23 +31,16 @@ from langchain.schema.messages import SystemMessage
 from langchain.prompts import MessagesPlaceholder
 from langchain.agents import AgentExecutor
 import json
+
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
 
-# datetime.datetime.now()
 datetime.now()
-# Get the current date in "%m/%d/%y" format
-# current_date = datetime.date.today().strftime("%m/%d/%y")
 current_date = datetime.today().strftime("%m/%d/%y")
-# Get the day of the week (0: Monday, 1: Tuesday, ..., 6: Sunday)
-# day_of_week = datetime.date.today().weekday()
 day_of_week = datetime.today().weekday()
-# Convert the day of the week to a string representation
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 current_day = days[day_of_week]
 
-# print("Current date:", current_date)
-# print("Current day:", current_day)
 todays_date = current_date
 day_of_the_week = current_day
 
@@ -59,51 +52,47 @@ business_details_text = [
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
-# Initialize session state
-# Initialize session state
+st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about Inventory, Business details, Financing, Discounts, and Offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) and the appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
+
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
     
 if 'user_name_input' not in st.session_state:
     st.session_state.user_name_input = ""
-
-# Initialize new_session and in_chat_session attributes in session state
+    
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
 
-if 'in_chat_session' not in st.session_state:
-    st.session_state.in_chat_session = False
-    
-# Add refreshing_session to the session state and set its initial value to False
 if 'refreshing_session' not in st.session_state:
     st.session_state.refreshing_session = False
 
-# Initialize the sessions attribute in the session state
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
-# Function to handle user name input
 def handle_user_name_input():
     user_name_input = st.text_input("Your name:", key='user_name_input', value=str(st.session_state.user_name_input))
     if user_name_input:
         st.session_state.user_name = user_name_input
         st.session_state.user_name_input = user_name_input
-        
-# Display user name input field
+
+# Display user name input field only once, outside the form block
 handle_user_name_input()
 
-# Check if user name is provided
-if st.session_state.user_name:
-    st.write(f"Hello, {st.session_state.user_name}!")
+with st.form(key='my_form', clear_on_submit=True):
+    user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
+    submit_button = st.form_submit_button(label='Send')
+
+if submit_button and user_input:
+    output = conversational_chat(user_input)
+    st.session_state.chat_history.append((user_input, output))
+
 def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
     session_filename = f"{session_directory}/chat_session_{session_id}.json"
     
-    # Create the directory if it doesn't exist
     if not os.path.exists(session_directory):
         os.makedirs(session_directory)
     
-    # Convert session_data to a dictionary
     session_dict = {
         'user_name': session_data['user_name'],
         'chat_history': session_data['chat_history']
@@ -114,22 +103,18 @@ def save_chat_session(session_data, session_id):
             json.dump(session_dict, session_file)
     except Exception as e:
         st.error(f"An error occurred while saving the chat session: {e}")
-# Function to load previous chat sessions from files
+
 def load_previous_sessions():
     previous_sessions = {}
     
-    # Check if the chat_sessions folder exists
     if not os.path.exists("chat_sessions"):
         os.makedirs("chat_sessions")
     
-    # Get a list of chat session files
     session_files = os.listdir("chat_sessions")
     
-    # Load each chat session file
     for session_file in session_files:
         session_filename = os.path.join("chat_sessions", session_file)
         
-        # Extract session ID from the file name
         session_id = session_file.split("_")[-1].split(".json")[0]
         
         with open(session_filename, "r") as session_file:
@@ -138,7 +123,6 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Handle session refresh button
 if st.button("Refresh Session"):
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
     st.session_state.user_name = user_name
@@ -159,36 +143,25 @@ if st.button("Refresh Session"):
     save_chat_session(current_session, session_id)
     st.session_state.chat_history = []
 
-# Load previous chat sessions only if it's a new session
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
 
-# Set user_name_input to the existing user name if it's not a new session
 if not st.session_state.new_session:
     st.session_state.user_name_input = st.session_state.user_name
 
-# Display the name input field only when it's a new session and not inside a chat session
-if st.session_state.new_session and not st.session_state.in_chat_session:
-    user_name = st.session_state.user_name_input
-    if user_name:
-        st.session_state.new_session = True
-
-# Display a list of session names in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
 for session_id, session_data in st.session_state.sessions.items():
     session_key = f"session_{session_id}"
     
     if st.sidebar.button(f"Session {session_id}"):
-        # When a session ID is clicked, update the chat history to show messages for that session
         st.session_state.chat_history = session_data['chat_history']
-        st.session_state.new_session = False  # Mark that it's not a new session
-    
-    # Add a session prompt for the user's name
+        st.session_state.new_session = False
+
     if session_id == st.session_state.user_name:
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
-            st.session_state.new_session = False  # Mark that it's not a new session
+            st.session_state.new_session = False
 
 file_1 = r'dealer_1_inventry.csv'
 
@@ -196,49 +169,47 @@ loader = CSVLoader(file_path=file_1)
 docs_1 = loader.load()
 embeddings = OpenAIEmbeddings()
 vectorstore_1 = FAISS.from_documents(docs_1, embeddings)
-retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})#check without similarity search and k=8
+retriever_1 = vectorstore_1.as_retriever(search_type="similarity", search_kwargs={"k": 8})
 
-# Create the first tool
 tool1 = create_retriever_tool(
     retriever_1, 
      "search_car_dealership_inventory",
      "Searches and returns documents regarding the car inventory and Input should be a single string strictly."
 )
 
-# Create the third tool
 tool3 = create_retriever_tool(
     retriever_3, 
     "search_business_details",
     "Searches and returns documents related to business working days and hours, location and address details."
 )
 
-# Append all tools to the tools list
 tools = [tool1, tool3]
 
-# airtable
 airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
 os.environ["AIRTABLE_API_KEY"] = airtable_api_key
 AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"  
-AIRTABLE_TABLE_NAME = "Question_Answer_Data" 
-# Streamlit UI setup
-st.info(" We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing a environment to check offerings and also check Our website [engane.ai](https://funnelai.com/). This test application answers about Inventry, Business details, Financing and Discounts and Offers related questions. [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) is a inventry dataset explore and play with the data. Appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv)")
-# Initialize session state
+AIRTABLE_TABLE_NAME = "Question_Answer_Data"
+
+
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
+
 if 'generated' not in st.session_state:
     st.session_state.generated = []
+
 if 'past' not in st.session_state:
     st.session_state.past = []
-# Initialize user name in session state
+
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature = 0)
-langchain.debug=True
+llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
+langchain.debug = True
 memory_key = "history"
 memory = AgentTokenBufferMemory(memory_key=memory_key, llm=llm)
-template=(
-"""You're the Business Development Manager at our car dealership./
+
+template = (
+    """You're the Business Development Manager at our car dealership./
 When responding to inquiries, please adhere to the following guidelines:
 Car Inventory Questions: If the customer's inquiry lacks specific details such as their preferred/
 make, model, new or used car, and trade-in, kindly engage by asking for these specifics./
@@ -252,12 +223,12 @@ Model :
 Make :
 Trim:
 scheduling Appointments: If the customer's inquiry lacks specific details such as their preferred/
-day, date or time kindly engage by asking for these specifics. {details} Use these details that is todays date and day /
-to find the appointment date from the users input and check for appointment availabity for that specific date and time. 
+day, date, or time kindly engage by asking for these specifics. {details} Use these details that are today's date and day /
+to find the appointment date from the user's input and check for appointment availability for that specific date and time. 
 If the appointment schedule is not available provide this 
-link: www.dummy_calenderlink.com to schedule appointment by the user himself. 
+link: www.dummy_calenderlink.com to schedule an appointment by the user himself. 
 If appointment schedules are not available, you should send this link: www.dummy_calendarlink.com to the 
-costumer to schedule an appointment on your own.
+customer to schedule an appointment on your own.
 
 Encourage Dealership Visit: Our goal is to encourage customers to visit the dealership for test drives or/
 receive product briefings from our team. After providing essential information on the car's make, model,/
@@ -268,9 +239,10 @@ Please maintain a courteous and respectful tone in your American English respons
 If you're unsure of an answer, respond with 'I am sorry.'/
 Make every effort to assist the customer promptly while keeping responses concise, not exceeding two sentences."
 Feel free to use any tools available to look up for relevant information.
-Answer the question not more than two sentence.""")
+Answer the question not more than two sentences."""
+)
 
-details = "Today's current date is " + todays_date + " and today's week day is " + day_of_the_week + "."
+details = "Today's current date is " + todays_date + " and today's weekday is " + day_of_the_week + "."
 
 input_template = template.format(details=details)
 
@@ -323,7 +295,7 @@ if st.session_state.user_name is None:
         st.session_state.name_entered = True
 
 user_input = ""
-output = ""  # Define output variable here
+output = ""  
 
 with st.form(key='my_form', clear_on_submit=True):
     user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
@@ -333,7 +305,6 @@ if submit_button and user_input:
     output = conversational_chat(user_input)
     st.session_state.chat_history.append((user_input, output))
 
-# Save the current session data to past sessions
 if st.session_state.user_name and st.session_state.chat_history:
     current_session_data = {
         'user_name': st.session_state.user_name,
@@ -343,7 +314,6 @@ if st.session_state.user_name and st.session_state.chat_history:
 
 with response_container:
     for i, (query, answer) in enumerate(st.session_state.chat_history):
-        # Get the user's name from st.session_state.user_name
         user_name = st.session_state.user_name
         message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
         message(answer, key=f"{i}_answer", avatar_style="thumbs")
