@@ -1,4 +1,5 @@
 import os
+import json
 from airtable import Airtable
 from langchain.chains.router import MultiRetrievalQAChain
 from langchain.llms import OpenAI
@@ -30,12 +31,15 @@ from langchain.agents.openai_functions_agent.base import OpenAIFunctionsAgent
 from langchain.schema.messages import SystemMessage
 from langchain.prompts import MessagesPlaceholder
 from langchain.agents import AgentExecutor
-import json
 
+# Set your OpenAI API key here
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+
+# Streamlit App Title and Info
 st.image("socialai.jpg")
 st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about Inventory, Business details, Financing, Discounts, and Offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) and the appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
-datetime.now()
+
+# Get current date and day of the week
 current_date = datetime.today().strftime("%m/%d/%y")
 day_of_week = datetime.today().weekday()
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -45,21 +49,21 @@ todays_date = current_date
 day_of_the_week = current_day
 
 business_details_text = [
-    "working days: all Days except sunday",
-    "working hours: 9 am to 7 pm"
-    "Phone: (555) 123-4567"
-    "Address: 567 Oak Avenue, Anytown, CA 98765, Email: jessica.smith@example.com",
-    "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
+    "working days: all Days except Sunday",
+    "working hours: 9 am to 7 pm",
+    "Phone: (555) 123-4567",
+    "Address: 567 Oak Avenue, Anytown, CA 98765",
+    "Email: jessica.smith@example.com",
+    "Dealer ship location: [Google Maps Link](https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu)"
 ]
+
+# Create a retriever for business details
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 
-
+# Initialize Streamlit session state variables
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-    
-if 'user_name_input' not in st.session_state:
-    st.session_state.user_name_input = ""
-    
+
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
 
@@ -69,18 +73,8 @@ if 'refreshing_session' not in st.session_state:
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
-def handle_user_name_input():
-    # Initialize user_name_input if it's not in session state
-    if 'user_name_input' not in st.session_state:
-        st.session_state.user_name_input = ""
-
-    user_name_input = st.text_input("Your name:", key='user_name_input', value=str(st.session_state.user_name_input))
-    if user_name_input:
-        st.session_state.user_name = user_name_input
-        st.session_state.user_name_input = user_name_input
-
-# Display user name input field only once, outside the form block
-handle_user_name_input()
+# Initialize session state variables
+st.session_state.user_name_input = ""
 
 def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
@@ -127,7 +121,6 @@ if st.button("Refresh Session"):
         st.session_state.new_session = True
         st.session_state.user_name_input = user_name
         st.session_state.chat_history = []
-        st.session_state.in_chat_session = False
     else:
         st.session_state.user_name_input = ""
 
@@ -141,9 +134,6 @@ if st.button("Refresh Session"):
 
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
-
-if not st.session_state.new_session:
-    st.session_state.user_name_input = st.session_state.user_name
 
 st.sidebar.header("Chat Sessions")
 
@@ -185,7 +175,6 @@ airtable_api_key = st.secrets["AIRTABLE"]["AIRTABLE_API_KEY"]
 os.environ["AIRTABLE_API_KEY"] = airtable_api_key
 AIRTABLE_BASE_ID = "appAVFD4iKFkBm49q"  
 AIRTABLE_TABLE_NAME = "Question_Answer_Data"
-
 
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
@@ -257,8 +246,6 @@ if 'agent_executor' not in st.session_state:
 else:
     agent_executor = st.session_state.agent_executor
 
-response_container = st.container()
-container = st.container()
 
 response_container = st.container()
 container = st.container()
@@ -283,12 +270,6 @@ def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
-
-if st.session_state.user_name is None:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
-        st.session_state.name_entered = True
 
 user_input = ""
 output = ""  
