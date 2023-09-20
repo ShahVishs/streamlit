@@ -161,12 +161,11 @@ st.sidebar.header("Chat Sessions")
 for session_data in st.session_state.past:
     user_name = session_data['user_name']
     chat_history = session_data['chat_history']
-    session_date = chat_history[0][0].split(" ")[0]  # Get the date from the first message in the chat history
-    formatted_session_name = f"{user_name} - {session_date}"
     
-    # Extract the session timestamp from the session_data (YYMMDDHHMMSS)
-    session_timestamp = session_data['timestamp']
-    formatted_session_name += f" {session_timestamp}"
+    # Get the current timestamp in the format YYMMDDHHMMSS
+    current_timestamp = datetime.now().strftime("%y%m%d%H%M%S")
+    
+    formatted_session_name = f"{user_name} - {current_timestamp}"
     
     if st.sidebar.button(formatted_session_name):
         st.session_state.chat_history = chat_history
