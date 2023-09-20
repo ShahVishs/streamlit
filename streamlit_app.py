@@ -34,7 +34,7 @@ import json
 
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 st.image("socialai.jpg")
-
+st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about Inventory, Business details, Financing, Discounts, and Offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) and the appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
 datetime.now()
 current_date = datetime.today().strftime("%m/%d/%y")
 day_of_week = datetime.today().weekday()
@@ -70,6 +70,10 @@ if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
 def handle_user_name_input():
+    # Initialize user_name_input if it's not in session state
+    if 'user_name_input' not in st.session_state:
+        st.session_state.user_name_input = ""
+
     user_name_input = st.text_input("Your name:", key='user_name_input', value=str(st.session_state.user_name_input))
     if user_name_input:
         st.session_state.user_name = user_name_input
@@ -154,7 +158,7 @@ for session_id, session_data in st.session_state.sessions.items():
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
             st.session_state.new_session = False
-st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about Inventory, Business details, Financing, Discounts, and Offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) and the appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
+
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
