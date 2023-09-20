@@ -129,7 +129,7 @@ def load_previous_sessions():
 user_name = st.text_input("Your name:")
 
 # Check if the user's name has changed
-if st.session_state.user_name is None or st.session_state.user_name != user_name:
+if st.session_state.user_name != user_name:
     create_new_session(user_name)
 
 # Inside the code block for starting a new session
