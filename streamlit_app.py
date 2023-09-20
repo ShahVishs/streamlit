@@ -63,11 +63,10 @@ retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_ret
 # Initialize session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-
-# Initialize user_name_input in session state
+    
 if 'user_name_input' not in st.session_state:
-    st.session_state.user_name_input = None
-
+    st.session_state.user_name_input = ""
+    
 # Initialize a flag to track whether the session is new or refreshing
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
@@ -82,11 +81,11 @@ if 'sessions' not in st.session_state:
 
 # Function to handle user name input
 def handle_user_name_input():
-    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
+    user_name_input = st.text_input("Your name:", key='user_name_input', value=str(st.session_state.user_name_input))
     if user_name_input:
         st.session_state.user_name = user_name_input
         st.session_state.user_name_input = user_name_input
-
+        
 # Display user name input field
 handle_user_name_input()
 
