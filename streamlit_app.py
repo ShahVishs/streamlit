@@ -304,6 +304,7 @@ def save_chat_to_airtable(user_name, user_input, output):
 
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
+    # Append the user input and agent's response to chat history only once
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
@@ -322,7 +323,7 @@ with st.form(key='my_form', clear_on_submit=True):
 
 if submit_button and user_input:
     output = conversational_chat(user_input)
-    st.session_state.chat_history.append((user_input, output))
+    # st.session_state.chat_history.append((user_input, output))
 
 # Save the current session data to past sessions
 if st.session_state.user_name and st.session_state.chat_history:
