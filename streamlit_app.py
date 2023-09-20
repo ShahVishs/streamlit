@@ -79,14 +79,14 @@ if 'refreshing_session' not in st.session_state:
 # Initialize the sessions attribute in the session state
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
+# Function to create a new session based on the user's name
+def create_new_session(user_name):
+    st.session_state.user_name = user_name
+    st.session_state.chat_history = []
 
+# Function to save the current chat session
 def save_chat_session(session_data, session_id):
-    session_directory = "chat_sessions"
-    session_filename = f"{session_directory}/chat_session_{session_id}.json"
-    
-    # Create the directory if it doesn't exist
-    if not os.path.exists(session_directory):
-        os.makedirs(session_directory)
+    session_filename = f"chat_sessions/chat_session_{session_id}.json"
     
     # Convert session_data to a dictionary
     session_dict = {
@@ -94,11 +94,9 @@ def save_chat_session(session_data, session_id):
         'chat_history': session_data['chat_history']
     }
     
-    try:
-        with open(session_filename, "w") as session_file:
-            json.dump(session_dict, session_file)
-    except Exception as e:
-        st.error(f"An error occurred while saving the chat session: {e}")
+    with open(session_filename, "w") as session_file:
+        json.dump(session_dict, session_file)
+
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
@@ -122,6 +120,10 @@ def load_previous_sessions():
             previous_sessions[session_id] = session_data
     
     return previous_sessions
+
+# Check if the user's name has changed
+if st.session_state.user_name is None or st.session_state.user_name != user_name:
+    create_new_session(user_name)
 
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
@@ -172,13 +174,12 @@ for session_id, session_data in st.session_state.sessions.items():
     if st.sidebar.button(f"Session {session_id}"):
         # When a session ID is clicked, update the chat history to show messages for that session
         st.session_state.chat_history = session_data['chat_history']
-        st.session_state.new_session = False  # Mark that it's not a new session
     
     # Add a session prompt for the user's name
     if session_id == st.session_state.user_name:
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
-            st.session_state.new_session = False  # Mark that it's not a new session
+            create_new_session(st.session_state.user_name)
 
 file_1 = r'dealer_1_inventry.csv'
 
