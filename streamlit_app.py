@@ -103,6 +103,7 @@ def save_chat_session(session_data, session_id):
     except Exception as e:
         st.error(f"An error occurred while saving the chat session: {e}")
 # Function to load previous chat sessions from files
+# Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
     
@@ -129,12 +130,16 @@ def load_previous_sessions():
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
+    st.session_state.user_name = user_name  # Update user name in session state
+    
     if user_name:
-        st.session_state.user_name = user_name  # Update user name in session state
-        st.session_state.new_session = False  # Mark that it's not a new session
+        st.session_state.new_session = True  # Mark that it's a new session
         st.session_state.user_name_input = user_name  # Update user_name_input
+        st.session_state.chat_history = []  # Clear chat history for the new session
+        st.session_state.in_chat_session = False  # Mark that we are not inside a chat session
     else:
         st.session_state.user_name_input = ""  # Reset user_name_input if no name is provided
+
     # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
@@ -160,7 +165,7 @@ else:
 if st.session_state.new_session and not st.session_state.in_chat_session:
     user_name = st.session_state.user_name_input
     if user_name:
-        st.session_state.new_session = False  # Mark that it's not a new session
+        st.session_state.new_session = True  # Mark that it's a new session
 else:
     user_name = st.session_state.user_name
 
@@ -325,12 +330,14 @@ if submit_button and user_input:
     output = conversational_chat(user_input)
 
 # Save the current session data to past sessions
+
+# Save the current session data to the corresponding session in sessions dictionary
 if st.session_state.user_name and st.session_state.chat_history:
     current_session_data = {
         'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
-    st.session_state.past.append(current_session_data)
+    st.session_state.sessions[session_id] = current_session_data
 
 with response_container:
     for i, (query, answer) in enumerate(st.session_state.chat_history):
