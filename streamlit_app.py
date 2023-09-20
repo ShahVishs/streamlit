@@ -85,6 +85,7 @@ if 'sessions' not in st.session_state:
 # Initialize st.session_state.past as an empty list if it doesn't exist
 if 'past' not in st.session_state:
     st.session_state.past = []
+
 # Function to save chat session data
 def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
@@ -123,12 +124,13 @@ def load_previous_sessions():
     
     return previous_sessions
 
+# Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
-    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-
-    if user_name:
-        st.session_state.user_name = user_name  # Update user name in session state
+    user_name_input = st.text_input("Your name:")
+    
+    if user_name_input:
+        st.session_state.user_name = user_name_input  # Update user name in session state
         st.session_state.refreshing_session = True  # Mark that it's a refreshing session
     else:
         st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
