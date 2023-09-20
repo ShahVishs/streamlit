@@ -72,9 +72,13 @@ if 'user_name_input' not in st.session_state:
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
 
-# Function to save the current chat session
-def save_chat_session(session_data, session_id):
-    session_filename = f"chat_sessions/chat_session_{session_id}.json"
+def save_chat_session(session_data, username):
+    session_directory = "chat_sessions"
+    session_filename = f"{session_directory}/chat_session_{username}.json"
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(session_directory):
+        os.makedirs(session_directory)
     
     # Convert session_data to a dictionary
     session_dict = {
@@ -82,9 +86,11 @@ def save_chat_session(session_data, session_id):
         'chat_history': session_data['chat_history']
     }
     
-    with open(session_filename, "w") as session_file:
-        json.dump(session_dict, session_file)
-
+    try:
+        with open(session_filename, "w") as session_file:
+            json.dump(session_dict, session_file)
+    except Exception as e:
+        st.error(f"An error occurred while saving the chat session: {e}")
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
@@ -115,17 +121,20 @@ if st.button("Refresh Session"):
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
     st.session_state.user_name = user_name  # Update user name in session state
     if user_name:
-        st.session_state.new_session = False  # Mark that it's not a new session
-    
-    # Use the username as the session name
-    session_name = st.session_state.user_name
-    
-    # Store the session data with the username as the session name
-    st.session_state.sessions[session_name] = {
+        st.session_state.refreshing_session = True  # Mark that it's a refreshing session
+    else:
+        st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
+
+    # Save the current session and start a new one
+    current_session = {
         'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history,
-        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        'chat_history': st.session_state.chat_history
     }
+
+    # Use username as session ID
+    session_id = st.session_state.user_name
+
+    save_chat_session(current_session, session_id)
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
