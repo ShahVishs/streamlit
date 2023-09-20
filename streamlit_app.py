@@ -52,7 +52,7 @@ business_details_text = [
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
-st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about Inventory, Business details, Financing, Discounts, and Offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) and the appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
+
 
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
@@ -162,7 +162,7 @@ for session_id, session_data in st.session_state.sessions.items():
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
             st.session_state.new_session = False
-
+st.info("We're developing cutting-edge conversational AI solutions tailored for automotive retail, aiming to provide advanced products and support. As part of our progress, we're establishing an environment to check offerings and also check our website [engane.ai](https://funnelai.com/). This test application answers questions about Inventory, Business details, Financing, Discounts, and Offers. You can explore and play with the inventory dataset [here](https://github.com/buravelliprasad/streamlit/blob/main/dealer_1_inventry.csv) and the appointment dataset [here](https://github.com/buravelliprasad/streamlit_dynamic_retrieval/blob/main/appointment.csv).")
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
