@@ -115,20 +115,20 @@ if st.button("Refresh Session"):
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
     st.session_state.user_name = user_name  # Update user name in session state
     if user_name:
-        st.session_state.refreshing_session = True  # Mark that it's a refreshing session
-    else:
-        st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
-
+        st.session_state.new_session = False  # Mark that it's not a new session
+    # Generate a unique session_id based on the timestamp
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
     # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history
+        'chat_history': st.session_state.chat_history,
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
-    # Use the user's name as the session key
-    session_key = user_name
+    # Generate a unique session_id based on the timestamp
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    save_chat_session(current_session, session_key)
+    save_chat_session(current_session, session_id)
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
@@ -139,6 +139,14 @@ if st.session_state.new_session:
 else:
     # If it's not a new session, set user_name_input to the existing user name
     st.session_state.user_name_input = st.session_state.user_name
+
+# Display the name input field only when it's a new session
+if st.session_state.new_session:
+    user_name = st.session_state.user_name_input
+    if user_name:
+        st.session_state.new_session = False  # Mark that it's not a new session
+else:
+    user_name = st.session_state.user_name
 
 
 # Display a list of session names in the sidebar along with a delete button
@@ -157,6 +165,8 @@ for session_id, session_data in st.session_state.sessions.items():
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
             st.session_state.new_session = False  # Mark that it's not a new session
+        # Display the timestamp
+        st.write(f"Timestamp: {session_data['timestamp']}")
 
 file_1 = r'dealer_1_inventry.csv'
 
