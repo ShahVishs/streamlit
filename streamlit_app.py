@@ -122,24 +122,18 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Initialize session state variables
-if 'user_name' not in st.session_state:
-    st.session_state.user_name = None
-
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
-
 # Code block for starting a new session
 if st.button("Refresh Session"):
-    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    st.session_state.user_name = user_name
     
-    if user_name_input:
-        st.session_state.user_name = user_name_input  # Update the user name in the session state
+    if user_name:
         st.session_state.refreshing_session = True
-        st.session_state.new_session = False  # Reset the new session flag
+    else:
+        st.session_state.refreshing_session = False
 
     current_session = {
-        'user_name': st.session_state.user_name,  # Capture the user's name here
+        'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
 
@@ -147,13 +141,7 @@ if st.button("Refresh Session"):
     save_chat_session(current_session, session_id)
     st.session_state.chat_history = []
 
-# Display a list of past sessions in the sidebar along with a delete button
-st.sidebar.header("Chat Sessions")
-
-if st.session_state.refreshing_session:
-    st.session_state.new_session = True
-    st.session_state.refreshing_session = False
-
+# Load previous chat sessions
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
 else:
@@ -163,21 +151,21 @@ if st.session_state.new_session:
     user_name = st.session_state.user_name_input
     if user_name:
         st.session_state.new_session = False
+
 else:
     user_name = st.session_state.user_name
 
-for i, session_data in enumerate(st.session_state.past):
+# Display a list of past sessions in the sidebar along with a delete button
+st.sidebar.header("Chat Sessions")
+
+for session_data in st.session_state.past:
     user_name = session_data['user_name']
     chat_history = session_data['chat_history']
-    
-    # Get the current timestamp in the format YYMMDDHHMMSS
-    current_timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-    
-    formatted_session_name = f"{user_name} - {current_timestamp} - {i}"  # Add an index to make key unique
+    session_date = chat_history[0][0].split(" ")[0]  # Get the date from the first message in the chat history
+    formatted_session_name = f"{user_name} - {session_date}"
     
     if st.sidebar.button(formatted_session_name):
         st.session_state.chat_history = chat_history
-        
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
