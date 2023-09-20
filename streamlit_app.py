@@ -81,6 +81,9 @@ if 'refreshing_session' not in st.session_state:
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
+# Initialize st.session_state.past as an empty list if it doesn't exist
+if 'past' not in st.session_state:
+    st.session_state.past = []
 # Function to save chat session data
 def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
