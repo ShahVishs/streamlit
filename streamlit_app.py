@@ -79,6 +79,10 @@ if 'refreshing_session' not in st.session_state:
 # Initialize the sessions attribute in the session state
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
+# Initialize session state
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = None
+
 # Function to create a new session based on the user's name
 def create_new_session(user_name):
     st.session_state.user_name = user_name
@@ -120,6 +124,9 @@ def load_previous_sessions():
             previous_sessions[session_id] = session_data
     
     return previous_sessions
+
+# Get the user's name from a text input
+user_name = st.text_input("Your name:")
 
 # Check if the user's name has changed
 if st.session_state.user_name is None or st.session_state.user_name != user_name:
