@@ -308,11 +308,10 @@ def conversational_chat(user_input):
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-if st.session_state.user_name is None:
-    user_name = st.text_input("Your name:")
-    if user_name:
-        st.session_state.user_name = user_name
-        st.session_state.name_entered = True
+user_name = st.text_input("Your name:")
+if user_name:
+    st.session_state.user_name = user_name
+    st.session_state.name_entered = True
 
 user_input = ""
 output = ""  # Define output variable here
