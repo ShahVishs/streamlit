@@ -152,7 +152,6 @@ if st.session_state.new_session:
 else:
     user_name = st.session_state.user_name
 
-
 # Display a list of past sessions in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
@@ -163,9 +162,7 @@ for session_data in st.session_state.past:
     formatted_session_name = f"{user_name} - {session_date}"
     
     if st.sidebar.button(formatted_session_name):
-        # When a session is clicked, update the chat history to show messages for that session
         st.session_state.chat_history = chat_history
-
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
