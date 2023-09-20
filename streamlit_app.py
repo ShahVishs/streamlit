@@ -321,7 +321,7 @@ with st.form(key='my_form', clear_on_submit=True):
 
 if submit_button and user_input:
     output = conversational_chat(user_input)
-    st.session_state.chat_history.append((user_input, output))
+    # st.session_state.chat_history.append((user_input, output))
 
 # Save the current session data to past sessions
 if st.session_state.user_name and st.session_state.chat_history:
