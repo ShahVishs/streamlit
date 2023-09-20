@@ -60,7 +60,6 @@ business_details_text = [
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
 # Initialize session state
-# Initialize session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
@@ -99,6 +98,7 @@ def save_chat_session(session_data, session_id):
             json.dump(session_dict, session_file)
     except Exception as e:
         st.error(f"An error occurred while saving the chat session: {e}")
+
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
@@ -147,7 +147,6 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
-
 # Load previous chat sessions
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
@@ -162,6 +161,30 @@ if st.session_state.new_session:
         st.session_state.new_session = False  # Mark that it's not a new session
 else:
     user_name = st.session_state.user_name
+
+# Inside the code block for starting a new session
+if st.button("Refresh Session"):
+    # Prompt for the user's name when refreshing the session
+    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    st.session_state.user_name = user_name  # Update user name in session state
+    if user_name:
+        st.session_state.refreshing_session = True  # Mark that it's a refreshing session
+    else:
+        st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
+
+    # Save the current session and start a new one
+    current_session = {
+        'user_name': st.session_state.user_name,
+        'chat_history': st.session_state.chat_history
+    }
+
+    # Generate a unique session_id based on the timestamp
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    save_chat_session(current_session, session_id)
+
+    # Clear session state variables to start a new session
+    st.session_state.chat_history = []
 
 # Display a list of session names in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
@@ -178,8 +201,7 @@ for session_id, session_data in st.session_state.sessions.items():
     if session_id == st.session_state.user_name:
         st.session_state.user_name = st.text_input(f"Your name for Session {session_id}:", value=st.session_state.user_name, key=session_key)
         if st.session_state.user_name:
-            st.session_state.new_session = False  # Mark that it's not a new session
-
+            st.session_state.new_session = False  
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
