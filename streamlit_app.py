@@ -65,13 +65,9 @@ day_of_week = datetime.today().weekday()
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 current_day = days[day_of_week]
 
-# Initialize session state
+# Initialize session state variables
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-
-# Add refreshing_session to the session state and set its initial value to False
-if 'refreshing_session' not in st.session_state:
-    st.session_state.refreshing_session = False
 
 if 'user_name_input' not in st.session_state:
     st.session_state.user_name_input = None
@@ -79,13 +75,15 @@ if 'user_name_input' not in st.session_state:
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
 
+if 'refreshing_session' not in st.session_state:
+    st.session_state.refreshing_session = False
+
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
 # Initialize st.session_state.past as an empty list if it doesn't exist
 if 'past' not in st.session_state:
     st.session_state.past = []
-
 # Function to save chat session data
 def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
@@ -124,29 +122,23 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Inside the code block for starting a new session
+# Code block for starting a new session
 if st.button("Refresh Session"):
-    # Prompt for the user's name when refreshing the session
-    user_name_input = st.text_input("Your name:")
+    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    st.session_state.user_name = user_name
     
-    if user_name_input:
-        st.session_state.user_name = user_name_input  # Update user name in session state
-        st.session_state.refreshing_session = True  # Mark that it's a refreshing session
+    if user_name:
+        st.session_state.refreshing_session = True
     else:
-        st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
+        st.session_state.refreshing_session = False
 
-    # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
 
-    # Generate a unique session_id based on the timestamp
     session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-
     save_chat_session(current_session, session_id)
-
-    # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
 # Load previous chat sessions
@@ -163,10 +155,10 @@ if st.session_state.new_session:
 else:
     user_name = st.session_state.user_name
 
-## Display a list of past sessions in the sidebar along with a delete button
+# Display a list of past sessions in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
-for i, session_data in enumerate(st.session_state.past):
+for session_data in st.session_state.past:
     user_name = session_data['user_name']
     chat_history = session_data['chat_history']
     
@@ -175,10 +167,7 @@ for i, session_data in enumerate(st.session_state.past):
     
     formatted_session_name = f"{user_name} - {current_timestamp}"
     
-    # Use a unique identifier (e.g., session ID) as the key
-    button_key = f"session_button_{i}"
-    
-    if st.sidebar.button(formatted_session_name, key=button_key):
+    if st.sidebar.button(formatted_session_name):
         st.session_state.chat_history = chat_history
 file_1 = r'dealer_1_inventry.csv'
 
