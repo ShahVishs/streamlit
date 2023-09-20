@@ -164,6 +164,10 @@ for session_data in st.session_state.past:
     session_date = chat_history[0][0].split(" ")[0]  # Get the date from the first message in the chat history
     formatted_session_name = f"{user_name} - {session_date}"
     
+    # Extract the session timestamp from the session_data (YYMMDDHHMMSS)
+    session_timestamp = session_data['timestamp']
+    formatted_session_name += f" {session_timestamp}"
+    
     if st.sidebar.button(formatted_session_name):
         st.session_state.chat_history = chat_history
 file_1 = r'dealer_1_inventry.csv'
