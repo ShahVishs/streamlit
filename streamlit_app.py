@@ -66,11 +66,14 @@ if 'user_name' not in st.session_state:
     
 if 'user_name_input' not in st.session_state:
     st.session_state.user_name_input = ""
-    
-# Initialize a flag to track whether the session is new or refreshing
+
+# Initialize new_session and in_chat_session attributes in session state
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
 
+if 'in_chat_session' not in st.session_state:
+    st.session_state.in_chat_session = False
+    
 # Add refreshing_session to the session state and set its initial value to False
 if 'refreshing_session' not in st.session_state:
     st.session_state.refreshing_session = False
