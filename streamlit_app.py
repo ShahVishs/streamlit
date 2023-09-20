@@ -116,6 +116,7 @@ if st.button("Refresh Session"):
     st.session_state.user_name = user_name  # Update user name in session state
     if user_name:
         st.session_state.new_session = False  # Mark that it's not a new session
+    
     # Use the username as the session name
     session_name = st.session_state.user_name
     
@@ -129,13 +130,6 @@ if st.button("Refresh Session"):
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
-# Load previous chat sessions
-if st.session_state.new_session:
-    st.session_state.sessions = load_previous_sessions()
-else:
-    # If it's not a new session, set user_name_input to the existing user name
-    st.session_state.user_name_input = st.session_state.user_name
-
 # Display the name input field only when it's a new session
 if st.session_state.new_session:
     user_name = st.session_state.user_name_input
@@ -147,6 +141,7 @@ else:
 # Display a list of session names in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
+# Update the sidebar session list with the new session
 for session_name, session_data in st.session_state.sessions.items():
     session_key = f"session_{session_name}"
     
