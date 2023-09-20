@@ -80,10 +80,14 @@ def save_chat_session(session_data, username):
     if not os.path.exists(session_directory):
         os.makedirs(session_directory)
     
+    # Add a timestamp to the session data
+    session_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     # Convert session_data to a dictionary
     session_dict = {
         'user_name': session_data['user_name'],
-        'chat_history': session_data['chat_history']
+        'chat_history': session_data['chat_history'],
+        'timestamp': session_data['timestamp']
     }
     
     try:
@@ -91,6 +95,7 @@ def save_chat_session(session_data, username):
             json.dump(session_dict, session_file)
     except Exception as e:
         st.error(f"An error occurred while saving the chat session: {e}")
+        
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
