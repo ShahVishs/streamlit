@@ -308,7 +308,7 @@ def conversational_chat(user_input):
     st.session_state.chat_history.append((user_input, result["output"]))
     return result["output"]
 
-user_name = st.text_input("Your name:")
+user_name = st.text_input("Your name:", key='unique_key_for_user_name')
 if user_name:
     st.session_state.user_name = user_name
     st.session_state.name_entered = True
