@@ -139,21 +139,22 @@ if st.button("Refresh Session"):
         session_id = datetime.now().strftime("%Y%m%d%H%M%S")
         save_chat_session(current_session, session_id)
         st.session_state.chat_history = []
-
+        
 # Display a list of past sessions in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
-for session_data in st.session_state.past:
+for i, session_data in enumerate(st.session_state.past):
     user_name = session_data['user_name']
     chat_history = session_data['chat_history']
     
     # Get the current timestamp in the format YYMMDDHHMMSS
     current_timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     
-    formatted_session_name = f"{user_name} - {current_timestamp}"
+    formatted_session_name = f"{user_name} - {current_timestamp} - {i}"  # Add an index to make key unique
     
     if st.sidebar.button(formatted_session_name):
         st.session_state.chat_history = chat_history
+        
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
