@@ -80,6 +80,9 @@ if 'refreshing_session' not in st.session_state:
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
 
+if 'in_chat_session' not in st.session_state:
+    st.session_state.in_chat_session = False
+    
 def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
     session_filename = f"{session_directory}/chat_session_{session_id}.json"
