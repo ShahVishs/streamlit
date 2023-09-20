@@ -59,35 +59,39 @@ business_details_text = [
     "dealer ship location: https://www.google.com/maps/place/Pine+Belt+Mazda/@40.0835762,-74.1764688,15.63z/data=!4m6!3m5!1s0x89c18327cdc07665:0x23c38c7d1f0c2940!8m2!3d40.0835242!4d-74.1742558!16s%2Fg%2F11hkd1hhhb?entry=ttu"
 ]
 retriever_3 = FAISS.from_texts(business_details_text, OpenAIEmbeddings()).as_retriever()
-# Initialize session state
-# Initialize session state
+# Get the current date and day of the week
+current_date = datetime.today().strftime("%m/%d/%y")
+day_of_week = datetime.today().weekday()
+days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+current_day = days[day_of_week]
+
+# Initialize session state variables
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
 
-# Initialize user_name_input in session state
 if 'user_name_input' not in st.session_state:
-    st.session_state.user_name_input = ""
+    st.session_state.user_name_input = None
 
-# Initialize a flag to track whether the session is new or switching to a previous session
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
 
-def save_chat_session(session_data, username):
+if 'refreshing_session' not in st.session_state:
+    st.session_state.refreshing_session = False
+
+if 'sessions' not in st.session_state:
+    st.session_state.sessions = {}
+
+# Function to save chat session data
+def save_chat_session(session_data, session_id):
     session_directory = "chat_sessions"
-    session_filename = f"{session_directory}/chat_session_{username}.json"
+    session_filename = f"{session_directory}/chat_session_{session_id}.json"
     
-    # Create the directory if it doesn't exist
     if not os.path.exists(session_directory):
         os.makedirs(session_directory)
     
-    # Add a timestamp to the session data
-    session_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Convert session_data to a dictionary
     session_dict = {
         'user_name': session_data['user_name'],
-        'chat_history': session_data['chat_history'],
-        'timestamp': session_data['timestamp']
+        'chat_history': session_data['chat_history']
     }
     
     try:
@@ -95,23 +99,18 @@ def save_chat_session(session_data, username):
             json.dump(session_dict, session_file)
     except Exception as e:
         st.error(f"An error occurred while saving the chat session: {e}")
-        
+
 # Function to load previous chat sessions from files
 def load_previous_sessions():
     previous_sessions = {}
     
-    # Check if the chat_sessions folder exists
     if not os.path.exists("chat_sessions"):
         os.makedirs("chat_sessions")
     
-    # Get a list of chat session files
     session_files = os.listdir("chat_sessions")
     
-    # Load each chat session file
     for session_file in session_files:
         session_filename = os.path.join("chat_sessions", session_file)
-        
-        # Extract session ID from the file name
         session_id = session_file.split("_")[-1].split(".json")[0]
         
         with open(session_filename, "r") as session_file:
@@ -120,57 +119,49 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Inside the code block for starting a new session
+# Code block for starting a new session
 if st.button("Refresh Session"):
-    # Prompt for the user's name when refreshing the session
-    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
+    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
+    st.session_state.user_name = user_name
+    
     if user_name:
-        st.session_state.user_name = user_name  # Update user name in session state
-        st.session_state.user_name_input = user_name  # Update user_name_input in session state
-        st.session_state.new_session = True  # Mark that it's a refreshing session
+        st.session_state.refreshing_session = True
     else:
-        st.session_state.new_session = False  # Mark that it's not a refreshing session
+        st.session_state.refreshing_session = False
 
-    # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
 
-    # Use username as session ID
-    session_id = st.session_state.user_name
-
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
     save_chat_session(current_session, session_id)
-
-    # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
 # Load previous chat sessions
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
 else:
-    # If it's not a new session, set user_name_input to the existing user name
     st.session_state.user_name_input = st.session_state.user_name
-    
-# Display a list of session names in the sidebar along with a delete button
+
+if st.session_state.new_session:
+    user_name = st.session_state.user_name_input
+    if user_name:
+        st.session_state.new_session = False
+
+else:
+    user_name = st.session_state.user_name
+
 st.sidebar.header("Chat Sessions")
 
-# Update the sidebar session list with the new session
-for session_name, session_data in st.session_state.sessions.items():
-    session_key = f"session_{session_name}"
+for session_id, session_data in st.session_state.sessions.items():
+    session_key = f"session_{session_id}"
     
-    if st.sidebar.button(f"Session {session_name}"):
-        # When a session name is clicked, update the chat history to show messages for that session
+    if st.sidebar.button(f"Session {session_id}"):
         st.session_state.chat_history = session_data['chat_history']
-        st.session_state.new_session = False  # Mark that it's not a new session
-    
-    # Add a session prompt for the user's name
-    if session_name == st.session_state.user_name_input:
-        st.session_state.user_name_input = st.text_input(f"Your name for Session {session_name}:", value=st.session_state.user_name_input, key=session_key)
-        if st.session_state.user_name_input:
-            st.session_state.new_session = False  # Mark that it's not a new session
-        # Display the timestamp
-        st.write(f"Timestamp: {session_data['timestamp']}")
+        st.session_state.new_session = False
+
+
 file_1 = r'dealer_1_inventry.csv'
 
 loader = CSVLoader(file_path=file_1)
@@ -278,6 +269,7 @@ container = st.container()
 
 airtable = Airtable(AIRTABLE_BASE_ID, AIRTABLE_TABLE_NAME, api_key=airtable_api_key)
 
+# Function to save chat data to Airtable
 def save_chat_to_airtable(user_name, user_input, output):
     try:
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -292,6 +284,7 @@ def save_chat_to_airtable(user_name, user_input, output):
     except Exception as e:
         st.error(f"An error occurred while saving data to Airtable: {e}")
 
+# Function for conversational chat
 def conversational_chat(user_input):
     result = agent_executor({"input": user_input})
     st.session_state.chat_history.append((user_input, result["output"]))
@@ -301,20 +294,17 @@ if st.session_state.user_name is None:
     user_name = st.text_input("Your name:")
     if user_name:
         st.session_state.user_name = user_name
-        st.session_state.name_entered = True
 
 user_input = ""
-output = ""  # Define output variable here
+output = ""
 
 with st.form(key='my_form', clear_on_submit=True):
-    user_input = st.text_input("Query:", placeholder="Type your question here (:", key='input')
+    user_input = st.text_input("Query:", placeholder="Type your question here :)", key='input')
     submit_button = st.form_submit_button(label='Send')
 
 if submit_button and user_input:
     output = conversational_chat(user_input)
-    # st.session_state.chat_history.append((user_input, output))
 
-# Save the current session data to past sessions
 if st.session_state.user_name and st.session_state.chat_history:
     current_session_data = {
         'user_name': st.session_state.user_name,
@@ -324,7 +314,6 @@ if st.session_state.user_name and st.session_state.chat_history:
 
 with response_container:
     for i, (query, answer) in enumerate(st.session_state.chat_history):
-        # Get the user's name from st.session_state.user_name
         user_name = st.session_state.user_name
         message(query, is_user=True, key=f"{i}_user", avatar_style="big-smile")
         message(answer, key=f"{i}_answer", avatar_style="thumbs")
