@@ -66,7 +66,7 @@ if 'user_name' not in st.session_state:
 
 # Initialize user_name_input in session state
 if 'user_name_input' not in st.session_state:
-    st.session_state.user_name_input = None
+    st.session_state.user_name_input = ""
 
 # Initialize a flag to track whether the session is new or switching to a previous session
 if 'new_session' not in st.session_state:
@@ -123,27 +123,23 @@ def load_previous_sessions():
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
-    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
-    st.session_state.user_name_input = user_name_input  # Update user_name_input in session state
-    
-    if user_name_input:
-        # Update user_name in session state when a name is provided
-        st.session_state.user_name = user_name_input
-        st.session_state.refreshing_session = True  # Mark that it's a refreshing session
+    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
+    if user_name:
+        st.session_state.user_name = user_name  # Update user name in session state
+        st.session_state.user_name_input = user_name  # Update user_name_input in session state
+        st.session_state.new_session = True  # Mark that it's a refreshing session
     else:
-        st.session_state.refreshing_session = False
+        st.session_state.new_session = False  # Mark that it's not a refreshing session
 
-  
     # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history,
-        'timestamp': datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        'chat_history': st.session_state.chat_history
     }
-    
+
     # Use username as session ID
     session_id = st.session_state.user_name
-    
+
     save_chat_session(current_session, session_id)
 
     # Clear session state variables to start a new session
