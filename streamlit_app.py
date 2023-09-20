@@ -329,14 +329,13 @@ with st.form(key='my_form', clear_on_submit=True):
 if submit_button and user_input:
     output = conversational_chat(user_input)
 
-# Save the current session data to past sessions
-
-# Save the current session data to the corresponding session in sessions dictionary
 if st.session_state.user_name and st.session_state.chat_history:
     current_session_data = {
         'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")  # Generate a unique session ID based on the timestamp
+    print(f"Saving session data for session ID {session_id}: {current_session_data}")
     st.session_state.sessions[session_id] = current_session_data
 
 with response_container:
