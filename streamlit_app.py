@@ -162,10 +162,10 @@ if st.session_state.new_session:
 else:
     user_name = st.session_state.user_name
 
-# Display a list of past sessions in the sidebar along with a delete button
+## Display a list of past sessions in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
-for session_data in st.session_state.past:
+for i, session_data in enumerate(st.session_state.past):
     user_name = session_data['user_name']
     chat_history = session_data['chat_history']
     
@@ -174,7 +174,10 @@ for session_data in st.session_state.past:
     
     formatted_session_name = f"{user_name} - {current_timestamp}"
     
-    if st.sidebar.button(formatted_session_name):
+    # Use a unique identifier (e.g., session ID) as the key
+    button_key = f"session_button_{i}"
+    
+    if st.sidebar.button(formatted_session_name, key=button_key):
         st.session_state.chat_history = chat_history
 file_1 = r'dealer_1_inventry.csv'
 
