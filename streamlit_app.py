@@ -127,7 +127,7 @@ def load_previous_sessions():
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
-    user_name_input = st.text_input("Your name:", key='user_name_input')
+    user_name_input = st.text_input("Your name:")
     
     if user_name_input:
         st.session_state.user_name = user_name_input  # Update user name in session state
@@ -153,7 +153,15 @@ if st.button("Refresh Session"):
 if st.session_state.new_session:
     st.session_state.sessions = load_previous_sessions()
 else:
-    st.session_state.user_name_input = st.session_state
+    st.session_state.user_name_input = st.session_state.user_name
+
+if st.session_state.new_session:
+    user_name = st.session_state.user_name_input
+    if user_name:
+        st.session_state.new_session = False
+
+else:
+    user_name = st.session_state.user_name
 
 ## Display a list of past sessions in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
