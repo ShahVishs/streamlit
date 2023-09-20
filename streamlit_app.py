@@ -125,28 +125,29 @@ if st.button("Refresh Session"):
     else:
         st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
 
+  
     # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
-        'chat_history': st.session_state.chat_history
+        'chat_history': st.session_state.chat_history,
+        'timestamp': datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     }
-
+    
     # Use username as session ID
     session_id = st.session_state.user_name
-
+    
     save_chat_session(current_session, session_id)
 
     # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
-# Display the name input field only when it's a new session
+# Load previous chat sessions
 if st.session_state.new_session:
-    user_name = st.session_state.user_name_input
-    if user_name:
-        st.session_state.new_session = False  # Mark that it's not a new session
+    st.session_state.sessions = load_previous_sessions()
 else:
-    user_name = st.session_state.user_name
-
+    # If it's not a new session, set user_name_input to the existing user name
+    st.session_state.user_name_input = st.session_state.user_name
+    
 # Display a list of session names in the sidebar along with a delete button
 st.sidebar.header("Chat Sessions")
 
