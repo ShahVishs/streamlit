@@ -118,12 +118,15 @@ def load_previous_sessions():
 # Inside the code block for starting a new session
 if st.button("Refresh Session"):
     # Prompt for the user's name when refreshing the session
-    user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    st.session_state.user_name = user_name  # Update user name in session state
-    if user_name:
+    user_name_input = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name_input)
+    st.session_state.user_name_input = user_name_input  # Update user_name_input in session state
+    
+    if user_name_input:
+        # Update user_name in session state when a name is provided
+        st.session_state.user_name = user_name_input
         st.session_state.refreshing_session = True  # Mark that it's a refreshing session
     else:
-        st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
+        st.session_state.refreshing_session = False
 
   
     # Save the current session and start a new one
@@ -161,9 +164,9 @@ for session_name, session_data in st.session_state.sessions.items():
         st.session_state.new_session = False  # Mark that it's not a new session
     
     # Add a session prompt for the user's name
-    if session_name == st.session_state.user_name:
-        st.session_state.user_name = st.text_input(f"Your name for Session {session_name}:", value=st.session_state.user_name, key=session_key)
-        if st.session_state.user_name:
+    if session_name == st.session_state.user_name_input:
+        st.session_state.user_name_input = st.text_input(f"Your name for Session {session_name}:", value=st.session_state.user_name_input, key=session_key)
+        if st.session_state.user_name_input:
             st.session_state.new_session = False  # Mark that it's not a new session
         # Display the timestamp
         st.write(f"Timestamp: {session_data['timestamp']}")
