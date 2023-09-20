@@ -65,18 +65,19 @@ day_of_week = datetime.today().weekday()
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 current_day = days[day_of_week]
 
-# Initialize session state variables
+# Initialize session state
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
+
+# Add refreshing_session to the session state and set its initial value to False
+if 'refreshing_session' not in st.session_state:
+    st.session_state.refreshing_session = False
 
 if 'user_name_input' not in st.session_state:
     st.session_state.user_name_input = None
 
 if 'new_session' not in st.session_state:
     st.session_state.new_session = True
-
-if 'refreshing_session' not in st.session_state:
-    st.session_state.refreshing_session = False
 
 if 'sessions' not in st.session_state:
     st.session_state.sessions = {}
@@ -122,23 +123,29 @@ def load_previous_sessions():
     
     return previous_sessions
 
-# Code block for starting a new session
+# Inside the code block for starting a new session
 if st.button("Refresh Session"):
+    # Prompt for the user's name when refreshing the session
     user_name = st.text_input("Your name:", key='user_name_input', value=st.session_state.user_name)
-    st.session_state.user_name = user_name
     
     if user_name:
-        st.session_state.refreshing_session = True
+        st.session_state.user_name = user_name  # Update user name in session state
+        st.session_state.refreshing_session = True  # Mark that it's a refreshing session
     else:
-        st.session_state.refreshing_session = False
+        st.session_state.refreshing_session = False  # Mark that it's not a refreshing session
 
+    # Save the current session and start a new one
     current_session = {
         'user_name': st.session_state.user_name,
         'chat_history': st.session_state.chat_history
     }
 
+    # Generate a unique session_id based on the timestamp
     session_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
     save_chat_session(current_session, session_id)
+
+    # Clear session state variables to start a new session
     st.session_state.chat_history = []
 
 # Load previous chat sessions
